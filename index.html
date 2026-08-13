@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang='ja'>
 <html lang="ja"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -2315,7 +2314,7 @@
     htmlContent = htmlContent.replace(/<script id="quiz-data-script">[\s\S]*?<\/script>/, dataScript);
 
     try {
-      const blob = new Blob(["<!DOCTYPE html>\n<html lang='ja'>\n" + htmlContent + "\n</html>"], { type: 'text/html' });
+      const blob = new Blob(["<!DOCTYPE html>\n" + htmlContent], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
 
       // iOS Safari(及びiOS上の他ブラウザ)はdownload属性でのBlob保存に対応していないため、新規タブで開いて手動保存を案内する
@@ -2348,4 +2347,3 @@
 </script>
 
 </body></html>
-</html>
