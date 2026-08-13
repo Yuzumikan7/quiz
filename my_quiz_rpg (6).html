@@ -1,0 +1,2305 @@
+<!DOCTYPE html>
+<html lang='ja'>
+<html lang="ja"><head>
+  <meta charset="UTF-8">
+  <title>知識の迷宮：ノウリッジ・ダンジョン</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Zen+Kaku+Gothic+New:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #08080f;
+      --bg-panel: #12121d;
+      --bg-panel-2: #1a1a29;
+      --bg-panel-3: #22223a;
+      --line: #2a2a44;
+      --line-strong: #3d3d5f;
+      --text: #e5e7eb;
+      --text-dim: #9ca3af;
+      --text-fade: #6b7280;
+      --accent-viol: #a855f7;    /* グラム染色紫 primary */
+      --accent-viol-dim: #6d28d9;
+      --accent-cyan: #22d3ee;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      --accent-lime: #84cc16;
+      --accent-blood: #b91c1c;
+      --rare-sr: #fb923c;
+      --rare-r: #22d3ee;
+      --rare-n: #94a3b8;
+
+      --font-display: 'Cinzel', serif;
+      --font-body: 'Zen Kaku Gothic New', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-body);
+      background:
+        radial-gradient(ellipse at top, #1a0f2e 0%, transparent 55%),
+        radial-gradient(ellipse at bottom, #0f1a2e 0%, transparent 55%),
+        var(--bg-void);
+      background-attachment: fixed;
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 20px 16px;
+      margin: 0;
+      min-height: 100vh;
+      transition: opacity 0.05s;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 全画面に薄いスキャンライン */
+    body::before {
+      content: "";
+      position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+      background: repeating-linear-gradient(180deg, rgba(255,255,255,0.015) 0 1px, transparent 1px 3px);
+      mix-blend-mode: overlay;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      background:
+        linear-gradient(180deg, rgba(168,85,247,0.05) 0%, transparent 30%),
+        var(--bg-panel);
+      padding: 22px 18px 26px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      text-align: center;
+      position: relative;
+      box-shadow:
+        0 0 0 1px rgba(168,85,247,0.08),
+        0 30px 60px -20px rgba(0,0,0,0.8),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    .container::before {
+      content: "";
+      position: absolute; inset: -1px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, transparent 40%, rgba(168,85,247,0.4) 50%, transparent 60%);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 26px;
+      letter-spacing: 0.12em;
+      margin: 4px 0 20px;
+      color: var(--text);
+      text-transform: uppercase;
+      position: relative;
+    }
+    h1::after {
+      content: "";
+      display: block;
+      width: 42px; height: 2px;
+      background: var(--accent-viol);
+      margin: 8px auto 0;
+      box-shadow: 0 0 12px var(--accent-viol);
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      font-size: 20px;
+      margin: 4px 0 16px;
+      color: var(--text);
+    }
+    h3 {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 16px;
+      margin: 12px 0 10px;
+      color: var(--text);
+    }
+
+    /* ボタン基本 */
+    .btn {
+      background: linear-gradient(180deg, var(--bg-panel-3) 0%, var(--bg-panel-2) 100%);
+      color: var(--text);
+      border: 1px solid var(--line-strong);
+      padding: 12px 14px;
+      border-radius: 3px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      transition: transform 0.08s ease-out, border-color 0.15s, box-shadow 0.15s, background 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:hover {
+      border-color: var(--accent-viol);
+      box-shadow: 0 0 0 1px rgba(168,85,247,0.3), 0 0 20px -4px rgba(168,85,247,0.6);
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { background: #16162a; color: var(--text-fade); border-color: var(--line); cursor: not-allowed; opacity: 0.5; box-shadow: none; }
+
+    .btn-maker { background: linear-gradient(180deg, #d97706 0%, #b45309 100%); color: #fff; border-color: #f59e0b; }
+    .btn-maker:hover { border-color: #fbbf24; box-shadow: 0 0 0 1px rgba(245,158,11,0.4), 0 0 20px -4px rgba(245,158,11,0.7); }
+
+    .btn-stop { background: linear-gradient(180deg, #374151 0%, #1f2937 100%); border-color: #4b5563; }
+
+    .btn-review { background: linear-gradient(180deg, #4c1d95 0%, #2e1065 100%); border-color: var(--accent-viol-dim); }
+    .btn-review:hover { border-color: var(--accent-viol); }
+
+    .btn-submit {
+      background: linear-gradient(180deg, #dc2626 0%, #7f1d1d 100%);
+      border-color: #ef4444;
+      font-family: var(--font-display);
+      font-size: 17px; font-weight: 700; letter-spacing: 0.15em;
+      margin-top: 20px; padding: 16px;
+      text-transform: uppercase;
+    }
+    .btn-submit:hover { box-shadow: 0 0 0 1px rgba(239,68,68,0.4), 0 0 24px -4px rgba(239,68,68,0.8); }
+
+    .btn-sell { background: transparent; padding: 4px 8px; font-size: 11px; width: auto; margin-top: 4px; margin-left: 4px; border: 1px solid #b45309; color: #f59e0b; font-weight: 500; }
+    .btn-sell:hover { background: rgba(245,158,11,0.1); box-shadow: none; border-color: #fbbf24; }
+
+    .btn-shop { background: linear-gradient(180deg, #b45309 0%, #78350f 100%); border-color: #f59e0b; }
+
+    .btn-equip, .btn-unequip { background: transparent; padding: 4px 10px; font-size: 11px; width: auto; margin-top: 0; border: 1px solid var(--accent-viol); color: var(--accent-viol); font-weight: 500; border-radius: 3px; cursor: pointer; font-family: var(--font-body); }
+    .btn-unequip { border-color: var(--text-fade); color: var(--text-dim); }
+    .btn-equip:hover { background: rgba(168,85,247,0.12); }
+
+    /* データ初期化ボタン */
+    .btn-reset {
+      position: absolute; top: 6px; right: 8px;
+      background: transparent; color: var(--text-fade);
+      border: none; padding: 4px 6px; font-size: 9px; width: auto; font-weight: 500;
+      cursor: pointer; letter-spacing: 0.1em; font-family: var(--font-mono);
+      opacity: 0.4;
+    }
+    .btn-reset:hover { color: var(--accent-red); opacity: 1; }
+
+    /* 選択肢ボタン */
+    .opt-selected {
+      background: linear-gradient(180deg, rgba(168,85,247,0.35) 0%, rgba(109,40,217,0.25) 100%) !important;
+      border-color: var(--accent-viol) !important;
+      color: #fff !important;
+      box-shadow: 0 0 0 1px var(--accent-viol), 0 0 20px -4px var(--accent-viol) !important;
+    }
+
+    textarea {
+      width: 100%; height: 90px;
+      margin-bottom: 10px;
+      background: var(--bg-void); color: var(--text);
+      border: 1px solid var(--line-strong); border-radius: 3px;
+      padding: 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+    textarea:focus { outline: none; border-color: var(--accent-viol); box-shadow: 0 0 0 1px rgba(168,85,247,0.3); }
+
+    input, select {
+      width: 90%; padding: 11px 12px;
+      margin: 8px 0;
+      border-radius: 3px; border: 1px solid var(--line-strong);
+      background: var(--bg-void); color: var(--text);
+      font-family: var(--font-body); font-size: 14px;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--accent-viol); box-shadow: 0 0 0 1px rgba(168,85,247,0.25); }
+
+    #maker-screen, #race-screen, #game-screen, #mode-screen, #char-screen, #review-screen, #result-screen, #tree-screen, #global-history-screen, #shop-screen, #status-screen { display: none; }
+
+    /* 選択肢グリッド */
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+    .options .btn {
+      margin-top: 0; padding: 12px 12px 12px 42px;
+      font-size: 13px; min-height: 56px;
+      font-weight: 500;
+      text-align: left; line-height: 1.35;
+      position: relative;
+    }
+    .options .btn::before {
+      content: attr(data-label);
+      position: absolute; left: 8px; top: 10px;
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      box-sizing: border-box;
+      font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+      color: var(--accent-viol);
+      background: var(--bg-void);
+      border: 1px solid var(--line-strong);
+      border-radius: 3px;
+    }
+    .options .btn.opt-selected::before {
+      color: #fff; border-color: var(--accent-viol); background: var(--accent-viol-dim);
+    }
+    /* 不正解時に正解の選択肢をうっすら示すヒント */
+    .options .btn.opt-correct-hint {
+      border-color: var(--accent-lime) !important;
+      box-shadow: 0 0 0 1px rgba(132,204,22,0.4), 0 0 14px -2px rgba(132,204,22,0.5) !important;
+    }
+    .options .btn.opt-correct-hint::before {
+      color: var(--accent-lime); border-color: var(--accent-lime);
+    }
+
+    /* プレイヤーパネル */
+    .player-panel {
+      background:
+        linear-gradient(180deg, rgba(168,85,247,0.06) 0%, transparent 40%),
+        var(--bg-panel-2);
+      padding: 14px 14px 12px;
+      border-radius: 4px;
+      margin-bottom: 18px;
+      border: 1px solid var(--line);
+      position: relative;
+      text-align: left;
+    }
+    .player-panel::before {
+      content: "SPECIMEN /";
+      position: absolute; top: -8px; left: 12px;
+      font-family: var(--font-mono); font-size: 9px;
+      letter-spacing: 0.2em; color: var(--accent-viol);
+      background: var(--bg-panel); padding: 0 6px;
+      text-transform: uppercase;
+    }
+    .player-title {
+      display: inline-block;
+      font-family: var(--font-display); font-size: 15px; font-weight: 700;
+      color: var(--accent-amber); letter-spacing: 0.12em;
+      text-transform: uppercase; margin-bottom: 10px;
+      padding: 4px 14px;
+      background: linear-gradient(180deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.04) 100%);
+      border: 1px solid var(--accent-amber);
+      border-radius: 3px;
+      text-shadow: 0 0 10px rgba(245,158,11,0.7);
+      box-shadow: 0 0 16px -4px rgba(245,158,11,0.6), inset 0 0 10px rgba(245,158,11,0.08);
+      position: relative;
+    }
+    .player-title::before { content: "◆ "; opacity: 0.8; }
+    .player-title::after { content: " ◆"; opacity: 0.8; }
+    .player-name {
+      font-size: 22px; font-weight: 700;
+      margin-bottom: 10px; letter-spacing: 0.02em;
+    }
+    .exp-bar-bg {
+      background: var(--bg-void);
+      height: 8px; border-radius: 0;
+      overflow: hidden; margin-top: 6px;
+      border: 1px solid var(--line);
+      position: relative;
+    }
+    .exp-bar-fill {
+      background: linear-gradient(90deg, var(--accent-lime) 0%, #4ade80 100%);
+      height: 100%; width: 0%;
+      transition: width 0.3s;
+      box-shadow: 0 0 8px var(--accent-lime);
+    }
+
+    .equip-display {
+      position: absolute; top: 12px; right: 12px;
+      background: var(--bg-void);
+      padding: 4px 8px; border-radius: 2px;
+      border: 1px solid var(--accent-amber);
+      font-size: 11px; max-width: 160px;
+      font-family: var(--font-mono); letter-spacing: 0.03em;
+      color: var(--accent-amber);
+    }
+
+    .coin-display {
+      font-family: var(--font-mono); font-size: 13px;
+      color: var(--accent-amber); font-weight: 700;
+      margin-top: 8px; text-align: right;
+      letter-spacing: 0.05em;
+    }
+
+    /* バトル画面 */
+    .battle-area {
+      display: flex; justify-content: space-between; align-items: center;
+      background:
+        radial-gradient(circle at 70% 50%, rgba(239,68,68,0.15) 0%, transparent 50%),
+        radial-gradient(circle at 20% 50%, rgba(34,211,238,0.1) 0%, transparent 50%),
+        var(--bg-void);
+      padding: 16px 28px;
+      border-radius: 3px;
+      margin: 14px 0;
+      height: 120px;
+      position: relative;
+      border: 1px solid var(--line);
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+      overflow: hidden;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+    /* ダンジョンごとのテーマ背景 */
+    .battle-area.theme-kinder {
+      background:
+        radial-gradient(circle at 75% 30%, rgba(250,204,21,0.25) 0%, transparent 55%),
+        radial-gradient(circle at 20% 70%, rgba(74,222,128,0.18) 0%, transparent 55%),
+        linear-gradient(180deg, #1a2e1a 0%, var(--bg-void) 100%);
+      border-color: rgba(250,204,21,0.3);
+    }
+    .battle-area.theme-beginner {
+      background:
+        radial-gradient(circle at 70% 40%, rgba(34,211,238,0.2) 0%, transparent 55%),
+        radial-gradient(circle at 15% 70%, rgba(74,222,128,0.15) 0%, transparent 55%),
+        linear-gradient(180deg, #0f2a24 0%, var(--bg-void) 100%);
+      border-color: rgba(34,211,238,0.25);
+    }
+    .battle-area.theme-intermediate {
+      background:
+        radial-gradient(circle at 70% 50%, rgba(168,85,247,0.22) 0%, transparent 55%),
+        radial-gradient(circle at 20% 40%, rgba(59,130,246,0.15) 0%, transparent 55%),
+        linear-gradient(180deg, #1a1a3a 0%, var(--bg-void) 100%);
+      border-color: rgba(168,85,247,0.3);
+    }
+    .battle-area.theme-advanced {
+      background:
+        radial-gradient(circle at 75% 45%, rgba(249,115,22,0.28) 0%, transparent 55%),
+        radial-gradient(circle at 20% 60%, rgba(239,68,68,0.18) 0%, transparent 55%),
+        linear-gradient(180deg, #331207 0%, var(--bg-void) 100%);
+      border-color: rgba(249,115,22,0.35);
+    }
+    .battle-area.theme-super {
+      background:
+        radial-gradient(circle at 70% 50%, rgba(148,163,184,0.15) 0%, transparent 55%),
+        radial-gradient(circle at 25% 45%, rgba(15,23,42,0.6) 0%, transparent 60%),
+        linear-gradient(180deg, #050508 0%, #12121d 100%);
+      border-color: rgba(148,163,184,0.25);
+    }
+    .battle-area.theme-hell {
+      background:
+        radial-gradient(circle at 75% 40%, rgba(220,38,38,0.35) 0%, transparent 55%),
+        radial-gradient(circle at 20% 65%, rgba(124,4,4,0.4) 0%, transparent 60%),
+        linear-gradient(180deg, #2b0505 0%, #0a0000 100%);
+      border-color: rgba(220,38,38,0.5);
+      box-shadow: inset 0 0 40px rgba(220,38,38,0.25);
+    }
+    /* 微細グリッド */
+    .battle-area::before {
+      content: "";
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        linear-gradient(rgba(168,85,247,0.04) 1px, transparent 1px) 0 0 / 100% 20px,
+        linear-gradient(90deg, rgba(168,85,247,0.04) 1px, transparent 1px) 0 0 / 20px 100%;
+    }
+    .player-sprite {
+      font-size: 56px; z-index: 2;
+      filter: drop-shadow(0 0 8px rgba(34,211,238,0.4));
+    }
+    /* モンスターは顕微鏡の視野円の中に */
+    .monster-sprite {
+      font-size: 54px; z-index: 2;
+      width: 90px; height: 90px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(239,68,68,0.15) 0%, transparent 70%);
+      border: 1px solid rgba(239,68,68,0.35);
+      box-shadow:
+        inset 0 0 20px rgba(239,68,68,0.2),
+        0 0 15px rgba(239,68,68,0.3);
+      position: relative;
+    }
+    .monster-sprite::after {
+      content: "";
+      position: absolute; inset: -6px;
+      border: 1px dashed rgba(239,68,68,0.3);
+      border-radius: 50%;
+      animation: spinSlow 12s linear infinite;
+    }
+    @keyframes spinSlow { to { transform: rotate(360deg); } }
+
+    .monster-queue {
+      position: absolute; top: 6px; right: 12px;
+      font-size: 11px; letter-spacing: 3px;
+      color: var(--text-fade);
+      font-family: var(--font-mono);
+    }
+
+    @keyframes playerAttack { 0% { transform: translateX(0); } 30% { transform: translateX(60px); } 100% { transform: translateX(0); } }
+    @keyframes playerAdvance { 0% { transform: translateX(0); } 50% { transform: translateX(22px); } 100% { transform: translateX(0); } }
+    @keyframes monsterDamage { 0% { transform: translateX(0); filter: brightness(1); } 20% { transform: translateX(-10px); filter: brightness(2) sepia(1) hue-rotate(-50deg); } 40% { transform: translateX(10px); } 60% { transform: translateX(-10px); } 80% { transform: translateX(10px); } 100% { transform: translateX(0); filter: brightness(1); } }
+    @keyframes monsterDefeat { 0% { opacity: 1; transform: scale(1); filter: brightness(0); } 100% { opacity: 0; transform: scale(0); filter: brightness(0); } }
+    @keyframes monsterAttack { 0% { transform: translateX(0); } 50% { transform: translateX(-60px); } 100% { transform: translateX(0); } }
+    @keyframes playerDamage { 0% { transform: translateX(0); filter: brightness(1); } 20% { transform: translateX(10px); filter: drop-shadow(0 0 20px red) brightness(2); } 40% { transform: translateX(-10px); } 60% { transform: translateX(10px); } 100% { transform: translateX(0); filter: brightness(1); } }
+
+    .shake-hard { animation: shakeHard 0.3s ease-in-out; }
+    @keyframes shakeHard { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 25% { transform: translate(-10px, 5px) rotate(-2deg); } 50% { transform: translate(10px, -5px) rotate(2deg); } 75% { transform: translate(-10px, -5px) rotate(-1deg); } }
+
+    @keyframes simpleSlash { 0% { transform: scale(0.6) rotate(-10deg); opacity: 1; } 100% { transform: scale(1.8) rotate(15deg); opacity: 0; } }
+    .slash-fx { position: absolute; left: 68%; top: 50%; margin-top:-40px; margin-left:-40px; font-size: 76px; z-index: 10; pointer-events: none; animation: simpleSlash 0.28s ease-out forwards; filter: drop-shadow(0 0 12px #fbbf24); }
+
+    /* レビュー */
+    .review-item {
+      background: var(--bg-panel-2);
+      padding: 12px; margin-bottom: 10px;
+      border-radius: 3px;
+      text-align: left; font-size: 13px; line-height: 1.5;
+      border: 1px solid var(--line);
+    }
+    .review-ok { border-left: 3px solid var(--accent-lime); }
+    .review-ng { border-left: 3px solid var(--accent-red); }
+    .drop-text {
+      font-weight: bold; animation: pulse 1s infinite alternate;
+      margin-top: 6px; display: inline-block;
+      font-family: var(--font-mono); letter-spacing: 0.05em;
+    }
+
+    /* リザルト */
+    .clear-text {
+      font-family: var(--font-display); font-weight: 900;
+      font-size: 32px;
+      color: var(--accent-amber);
+      text-shadow: 0 0 20px rgba(245,158,11,0.6);
+      letter-spacing: 0.1em;
+      animation: pulse 1.2s infinite alternate;
+    }
+    @keyframes pulse { from { transform: scale(1); text-shadow: 0 0 12px rgba(245,158,11,0.5); } to { transform: scale(1.05); text-shadow: 0 0 24px rgba(245,158,11,0.9); } }
+
+    .result-box {
+      background: var(--bg-panel-2);
+      padding: 16px; border-radius: 3px;
+      margin: 16px 0; font-size: 16px;
+      border: 1px solid var(--line);
+      font-family: var(--font-mono);
+      text-align: left;
+      line-height: 1.7;
+    }
+
+    /* HUD ステータスバー */
+    .status-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 14px; margin-bottom: 6px;
+      background: var(--bg-panel-2);
+      padding: 8px 12px; border-radius: 3px;
+      border: 1px solid var(--line);
+    }
+    .life-display {
+      font-size: 18px; color: var(--accent-red);
+      font-weight: bold; letter-spacing: 0.1em;
+      text-shadow: 0 0 8px rgba(239,68,68,0.5);
+    }
+    .score-display {
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 12px; letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .score-display span {
+      font-weight: bold; color: var(--accent-amber);
+      font-family: var(--font-mono); font-size: 18px;
+      margin-left: 6px;
+    }
+
+    /* コンボカウンター */
+    .combo-area { min-height: 46px; margin: 8px 0; position: relative; }
+    .combo-counter {
+      font-family: var(--font-display); font-weight: 900;
+      font-size: 30px;
+      font-style: italic;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 12px rgba(34,211,238,0.6), 2px 2px 0 #000;
+      letter-spacing: 0.05em;
+      transition: transform 0.1s ease-out;
+    }
+    .combo-counter.pop { transform: scale(1.3) rotate(-3deg); }
+    .combo-fire {
+      color: var(--accent-red);
+      text-shadow: 0 0 18px rgba(239,68,68,0.9), 2px 2px 0 #000;
+      font-size: 42px;
+    }
+
+    /* ツリー系ボックス */
+    .tree-box {
+      background: var(--bg-panel-2);
+      padding: 12px; margin-bottom: 10px;
+      border-radius: 3px;
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--accent-viol);
+      text-align: left;
+    }
+    .tree-box strong { font-weight: 700; }
+
+    .collection-box { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 14px; }
+    .collection-item {
+      background: var(--bg-panel-2);
+      padding: 12px; border-radius: 3px;
+      font-size: 13px; color: var(--text);
+      border: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: center;
+      transition: border-color 0.15s;
+    }
+    .collection-item:hover { border-color: var(--line-strong); }
+    .collection-info { flex: 1; text-align: left; }
+
+    .cleared-badge {
+      color: var(--accent-amber); font-size: 10px;
+      margin-left: 6px;
+      font-family: var(--font-mono); letter-spacing: 0.1em;
+      text-shadow: 0 0 6px rgba(245,158,11,0.5);
+    }
+
+    .rarity-tag {
+      display: inline-block; padding: 2px 6px;
+      border-radius: 2px;
+      font-family: var(--font-mono); font-size: 9px;
+      font-weight: 700; margin-bottom: 4px;
+      letter-spacing: 0.15em; text-transform: uppercase;
+    }
+    .tag-sr { background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%); color: #fff; box-shadow: 0 0 8px rgba(251,146,60,0.5); }
+    .tag-r { background: linear-gradient(135deg, #22d3ee 0%, #0891b2 100%); color: #041722; }
+    .tag-n { background: #4b5563; color: #d1d5db; }
+
+    .rarity-sr { color: var(--rare-sr); font-weight: bold; text-shadow: 0 0 8px rgba(251,146,60,0.5); }
+    .rarity-r { color: var(--rare-r); font-weight: bold; text-shadow: 0 0 6px rgba(34,211,238,0.4); }
+    .rarity-n { color: var(--text); }
+
+    .defeated-icons {
+      font-size: 22px; margin-top: 10px;
+      word-break: break-all; line-height: 1.6;
+      background: var(--bg-void);
+      padding: 12px; border-radius: 3px;
+      border: 1px solid var(--line);
+    }
+
+    /* 種族/職業選択カードグリッド */
+    .avatar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+    .avatar-card {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      background: var(--bg-panel-2); border: 1px solid var(--line); border-radius: 4px;
+      padding: 16px 6px; cursor: pointer; color: var(--text);
+      font-family: var(--font-body);
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.08s;
+    }
+    .avatar-card:hover { border-color: var(--accent-viol); box-shadow: 0 0 16px -4px rgba(168,85,247,0.5); }
+    .avatar-card:active { transform: translateY(1px); }
+    .avatar-card .avatar-icon { font-size: 30px; }
+    .avatar-card .avatar-name { font-size: 12px; font-weight: 700; letter-spacing: 0.02em; }
+
+    .dropzone {
+      border: 2px dashed var(--accent-viol);
+      border-radius: 4px;
+      padding: 26px 15px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      background:
+        linear-gradient(180deg, rgba(168,85,247,0.05) 0%, transparent 60%),
+        var(--bg-panel-2);
+      text-align: center;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+    .dropzone:hover { background: var(--bg-panel-3); box-shadow: 0 0 20px -4px rgba(168,85,247,0.4); }
+    .dropzone.drag-over { background: #2a1f45; border-color: var(--accent-cyan); box-shadow: 0 0 24px -4px rgba(34,211,238,0.6); }
+
+    /* モード選択リスト */
+    .mode-list {
+      display: flex; flex-direction: column; gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    /* ダンジョンタブ(トグル)ボタン */
+    .dungeon-tab-btn {
+      display: flex; align-items: center; gap: 14px;
+      width: 100%;
+      background:
+        linear-gradient(135deg, rgba(168,85,247,0.12) 0%, transparent 60%),
+        var(--bg-panel-3);
+      border: 1px solid var(--accent-viol-dim);
+      border-radius: 4px;
+      padding: 14px 16px;
+      cursor: pointer;
+      color: var(--text);
+      font-family: var(--font-body);
+      text-align: left;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.08s;
+    }
+    .dungeon-tab-btn:hover { border-color: var(--accent-viol); box-shadow: 0 0 20px -6px rgba(168,85,247,0.6); }
+    .dungeon-tab-btn:active { transform: translateY(1px); }
+    .dungeon-tab-icon { font-size: 28px; }
+    .dungeon-tab-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .dungeon-tab-title {
+      font-family: var(--font-display); font-weight: 700;
+      font-size: 16px; letter-spacing: 0.05em; color: var(--text);
+    }
+    .dungeon-tab-sub {
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-fade); letter-spacing: 0.05em;
+    }
+    .dungeon-tab-arrow { font-size: 12px; color: var(--accent-viol); }
+
+    .mode-btn {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--bg-panel-2);
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: transform 0.08s, border-color 0.15s, box-shadow 0.15s;
+      font-family: var(--font-body);
+      text-align: left; width: 100%;
+      color: var(--text);
+      font-size: 14px; font-weight: 700;
+      border-left: 3px solid var(--line);
+    }
+    .mode-btn:hover { border-color: var(--line-strong); transform: translateX(2px); }
+    .mode-btn:active { transform: translateX(2px) translateY(1px); }
+    .mode-btn .mode-emoji { font-size: 22px; }
+    .mode-btn .mode-name { flex: 1; letter-spacing: 0.02em; }
+    .mode-btn .mode-meta {
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-fade); letter-spacing: 0.1em;
+    }
+    .mode-btn.mode-basic { border-left-color: var(--accent-cyan); }
+    .mode-btn.mode-endless { border-left-color: var(--accent-lime); }
+    .mode-btn.mode-weakness { border-left-color: var(--accent-amber); }
+    .mode-btn.mode-hell {
+      border-left-color: var(--accent-red);
+      background: linear-gradient(180deg, rgba(185,28,28,0.15) 0%, var(--bg-panel-2) 100%);
+    }
+    .mode-btn.cleared::after {
+      content: "★ CLEARED";
+      font-family: var(--font-mono); font-size: 9px;
+      color: var(--accent-amber); letter-spacing: 0.15em;
+      text-shadow: 0 0 6px rgba(245,158,11,0.5);
+    }
+
+    /* サブアクションのペア配置 */
+    .sub-actions { display: flex; gap: 8px; margin-top: 6px; }
+    .sub-actions .btn { margin-top: 0; }
+
+    /* データラベル(小さい計器ラベル) */
+    .lab-label {
+      font-family: var(--font-mono);
+      font-size: 10px; letter-spacing: 0.2em;
+      color: var(--text-fade); text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    /* ステータス画面のセクションカード */
+    .stat-card {
+      background: var(--bg-panel-2);
+      padding: 14px 14px 12px;
+      border-radius: 3px;
+      margin-bottom: 10px;
+      border: 1px solid var(--line);
+      position: relative;
+    }
+    .stat-card > .lab-label { color: var(--accent-viol); }
+
+    /* クイズ本文 */
+    #quiz-question {
+      background: var(--bg-panel-2);
+      padding: 14px 16px; border-radius: 3px;
+      border: 1px solid var(--line);
+      border-top: 2px solid var(--accent-viol);
+      font-size: 15px; line-height: 1.6;
+      margin: 12px 0 0;
+      text-align: left;
+      font-weight: 500;
+    }
+
+    /* メッセージ */
+    #message {
+      font-weight: bold;
+      min-height: 48px;
+      margin-top: 14px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* モード名・進行 */
+    .mode-line {
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 6px; padding: 0 2px;
+      letter-spacing: 0.05em;
+    }
+    .mode-line .mode-tag {
+      color: var(--accent-viol); font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+    }
+
+    /* ベストスコア */
+    .best-score-line {
+      text-align: right; font-size: 11px;
+      color: var(--accent-amber);
+      margin-bottom: 6px;
+      font-family: var(--font-mono); letter-spacing: 0.05em;
+    }
+
+    /* スクロールバー */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-void); }
+    ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 0; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-viol-dim); }
+
+    /* reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+
+    /* 狭幅対応 */
+    @media (max-width: 380px) {
+      .container { padding: 18px 12px 22px; }
+      .options { grid-template-columns: 1fr; }
+      h1 { font-size: 22px; }
+    }
+  </style>
+
+  <script id="quiz-data-script">
+    window.QUIZ_DATA = {"通常":[{"q":"糖尿病の 1 型と 2 型の分類に有用な検査項目はどれか","ans":[2,3],"opts":["血糖","HbA1c","インスリン","抗 GAD 抗体","グリコアルブミン"]},{"q":"検査項目で負の相関となる組合せはどれか","ans":[4],"opts":["AST — AL T","ChE — アルブミン","ナトリウム — クロール","クレアチニン — 尿素窒素","トリグリセライド — HDL-コレステロール"]},{"q":"原虫に用いられない染色法はどれか","ans":[3],"opts":["アクリジンオレンジ染色","抗酸染色","Giemsa 染色","Gram 染色","Kohn 染色"]},{"q":"蟯虫で誤っているのはどれか","ans":[4],"opts":["線虫類である","膣炎の原因となる","肛門周囲に産卵する","世界各地に分布する","オスはメスより大きい"]},{"q":"生化学検査に EDTA-2K 採血管を使用した。異常低値を示すのはどれ か","ans":[0],"opts":["鉄","リン","クロール","グルコース","ナトリウム"]},{"q":"医療安全で正しいのはどれか","ans":[0],"opts":["コミュニケーションは医療事故防止対策となる","インシデントレポートは原因となった個人を同定することが目的であ る","臨床検査関連の業務では、検査後プロセスでのインシデントが一番多 い","ハインリッヒの法則によれば 1 件の重大事故の裏には約 10 件のヒヤ リ・ハット事例がある","医療現場の事故の大部分はノンテクニカルスキルよりテクニカルスキ ルの不足が原因で発生する"]},{"q":"プリン塩基はどれか","ans":[1,3],"opts":["チミン","アデニン","ウラシル","グアニン","シトシン"]},{"q":"関節液中にピロリン酸カルシウム結晶が認められるのはどれか","ans":[1],"opts":["痛風","偽痛風","化膿性関節炎","変形性関節症","関節リウマチ（RA）"]},{"q":"肝硬変で低値を示すのはどれか","ans":[2],"opts":["アンモニア","総ビリルビン","ChE","γ-グロブリン","γ-GT"]},{"q":"自己免疫疾患でないのはどれか","ans":[3],"opts":["関節リウマチ（RA）","原発性胆汁性胆管炎（PBC）","Basedow 病","Duchenne 型筋ジストロフィー","1 型糖尿病"]},{"q":"対象集団の有病率の影響を受けるのはどれか","ans":[4],"opts":["感度","特異度","偽陽性率","陽性尤度比","陽性適（的）中率"]},{"q":"徐脈性不整脈に分類されるのはどれか","ans":[3],"opts":["心室細動","心房粗動","心室期外収縮","洞不全症候群","発作性上室頻拍"]},{"q":"副甲状腺機能低下症で認められるのはどれか","ans":[2],"opts":["多尿","抑うつ","テタニー","尿路結石","病的骨折"]},{"q":"僧帽弁輪運動速度の波で正しいのはどれか","ans":[1],"opts":["左室拡張末期にみられる","心尖部四腔像で計測する","連続波ドプラ法を使用する","基線より上向きの波形である","僧帽弁輪部の心尖部方向への運動を表す"]},{"q":"超音波検査でカメレオンサインがみられるのはどれか","ans":[2],"opts":["肝嚢胞","肝膿瘍","肝血管腫","肝細胞がん","転移性肝がん"]},{"q":"循環生理で正しいのはどれか","ans":[3],"opts":["肺動脈圧と大動脈圧は等しい","三尖弁は左房と左室の間にある","肺静脈から右房に血液が流入する","心拍出量は左室 1 回拍出量と心拍数の積で決まる","肺動脈には酸素飽和度の高い動脈血が流れている"]},{"q":"針筋電図検査で随意収縮により記録されるのはどれか","ans":[1],"opts":["陽性鋭波","運動単位電位","線維自発電位","線維束自発電位","ミオトニー放電"]},{"q":"心電図所見で基準範囲内であるのはどれか","ans":[3],"opts":["P 波幅 0.20 秒","PR 時間 0.26 秒","QRS 時間 0.16 秒","補正 QT 時間（QTc） 0.42 秒","R-R 間隔 0.40 秒"]},{"q":"換気で正しいのはどれか","ans":[1,3],"opts":["換気は内呼吸である","肺胞換気量と PaCO2 は反比例する","無意識下の換気は小脳で調節される","末梢化学受容器は酸素の低下を検出する","一回換気量と呼吸数の積で肺胞換気量になる"]},{"q":"ノーズクリップが必要な検査はどれか","ans":[2,4],"opts":["パルスオキシメータ","ピークフローメータ","一回呼吸法による DLCO 測定","呼気一酸化窒素濃度（FeNO）測定","オシロメトリー（強制オシレーション法）による呼吸抵抗測定"]},{"q":"健常者の正中神経を手関節部で電気刺激したときに大脳皮質で最初 に生じる反応はどれか","ans":[2],"opts":["N9","N13","N20","P31","P37"]},{"q":"ビリルビンで誤っているのはどれか","ans":[4],"opts":["遊離型ビリルビンは水に不溶性である","非抱合型ビリルビンは細胞毒性を有する","ビリルビンは抗酸化物質として機能する","間接ビリルビンはジアゾ反応に反応促進剤を必要とする","抱合型ビリルビンはアルブミンと結合してシャントビリルビンとな る"]},{"q":"日本臨床化学会（JSCC）勧告法で試薬に脱水素酵素が含まれるのは どれか","ans":[2],"opts":["ALP","AMY","CK","LD","γ-GT"]},{"q":"血清総蛋白の検査で誤っているのはどれか","ans":[3],"opts":["脱水状態で上昇する","蛋白質は 280 nm に極大吸収を持つ","座位の基準範囲は 6.6〜8.1 g/dL である","血清の屈折率は総蛋白濃度に反比例する","ビウレット反応はトリペプチドで起こる"]},{"q":"レシチンコレステロールアシルトランスフェラーゼ（LCAT）を活性 化するのはどれか","ans":[0,2],"opts":["アポ A-Ⅰ","アポ B-48","アポ C-Ⅰ","アポ C-Ⅱ","アポ E"]},{"q":"酵素法でクレアチニンを測定する際に用いられるのはどれか","ans":[2,4],"opts":["ウリカーゼ","乳酸脱水素酵素","クレアチニナーゼ","リンゴ酸脱水素酵素","ザルコシンオキシダーゼ"]},{"q":"レチノール結合蛋白（RBP）と結合するビタミンはどれか","ans":[0],"opts":["A","C","D","E","K"]},{"q":"敗血症マーカーはどれか","ans":[4],"opts":["KL-6","プレセプシン","アンギオテンシン変換酵素（ACE）","N-アセチルグルコサミニダーゼ（NAG）"]},{"q":"アニオンギャップが上昇するのはどれか","ans":[2],"opts":["嘔吐","下痢","乳酸アシドーシス","尿細管性アシドーシス","副甲状腺機能亢進症"]},{"q":"グルコース測定におけるヘキソキナーゼ・グルコース-6-リン酸デヒ ドロゲナーゼ法で正しいのはどれか","ans":[4],"opts":["酵素電極法で使用される","NADH の吸光度を測定する","アスコルビン酸の影響を受ける","試薬にはムタロターゼが必要である","日本臨床化学会（JSCC）勧告法である"]},{"q":"ペプチドホルモンはどれか","ans":[4],"opts":["アドレナリン","コルチゾール","テストステロン","トリヨードサイロニン","ヒト絨毛性ゴナドトロピン（hCG）"]},{"q":"クレアチニンで正しいのはどれか","ans":[3],"opts":["肝臓で合成される","尿細管で再吸収される","血漿濃度は脱水症で低値を示す","血漿濃度の基準範囲には男女差がある","血漿濃度は Duchenne 型筋ジストロフィーで高値を示す"]},{"q":"アミラーゼで誤っているのはどれか","ans":[2],"opts":["Cl- で活性化される","加水分解酵素である","α-1,6-グリコシド結合を切断する","唾液腺型は膵型より高分子量である","腎不全では血清アミラーゼ値が上昇する"]},{"q":"インドシアニングリーン（ICG）試験で正しいのはどれか","ans":[0],"opts":["早朝空腹時に行う","ICG を経口投与する","ICG は光に安定である","肝合成能の評価に用いられる","ICG 投与から 1 時間後に採血を行う"]},{"q":"放射線感受性が最も高いのはどれか","ans":[4],"opts":["肝細胞","脂肪細胞","心筋細胞","神経細胞","造血器細胞"]},{"q":"空腹時血清中総コレステロール 250 mg/dL、トリグリセライド 150 mg/dL、HDL-コレステロール 50 mg/dL のとき、Friedewald の計算式か ら求めた LDL-コレステロール値［mg/dL］はどれか","ans":[2],"opts":["50","100","170","200","230"]},{"q":"組織標本作製用固定液で正しいのはどれか","ans":[3],"opts":["10% ホルマリンは中性脂肪を溶解する","グルタルアルデヒドは組織への浸透力が強い","4% パラホルムアルデヒドにはギ酸が含まれる","10% 中性緩衝ホルマリンは網羅的遺伝子解析に適する","10% 中性ホルマリンの作製には塩化ナトリウムを用いる"]},{"q":"ミクロトームで正しいのはどれか","ans":[2,3],"opts":["刃の先端角度（刃角）は 2° である","ユング型ミクロトームの逃げ角は 90° である","クリオスタットはミノー型ミクロトームである","ミノー型ミクロトームの逃げ角は 2〜10° である","クロスローラーベアリング方式のミクロトームは回転式である"]},{"q":"染色結果で正しいのはどれか","ans":[4],"opts":["azan 染色で膠原線維は赤色に染まる","渡辺の鍍銀法で細網線維は赤褐色に染まる","Congo red 染色でアミロイドは灰色に染まる","PAM 染色でメサンギウム基質は青色に染まる","elastica van Gieson 染色で弾性線維は紫黒色に染まる"]},{"q":"健常成人で肝臓に接していないのはどれか","ans":[4],"opts":["腎臓","胆嚢","横隔膜","横行結腸","腹部大動脈"]},{"q":"組織と胚葉の組合せで正しいのはどれか","ans":[4],"opts":["筋肉 — 外胚葉","血管 — 外胚葉","脊髄 — 中胚葉","肺胞 — 中胚葉","甲状腺 — 内胚葉"]},{"q":"糖尿病で正しいのはどれか","ans":[3],"opts":["解糖系が促進する","糖新生は抑制される","早期から尿量が減少する","ケトン体の産生が亢進する","2 型糖尿病は膵島 β 細胞の破壊に起因する"]},{"q":"潰瘍性大腸炎で正しいのはどれか","ans":[4],"opts":["回盲部に多い","胃がんの合併が多い","陰部潰瘍を合併する","高齢者での発症が多い","組織学的には陰窩膿瘍を特徴とする"]},{"q":"ピクリン酸を含む固定液はどれか","ans":[0],"opts":["ブアン液","カルノア液","20% ホルマリン","2% オスミウム酸液","Periodate-lysine-paraformaldehyde（PLP）液"]},{"q":"炎症性肉芽組織に出現しない細胞はどれか","ans":[3],"opts":["好中球","リンパ球","線維芽細胞","平滑筋細胞","血管内皮細胞"]},{"q":"遺伝性腫瘍とその原因遺伝子の組合せで正しいのはどれか","ans":[1],"opts":["遺伝性乳癌卵巣癌症候群 — RB1","家族性大腸腺腫症 — APC","Cowden 病 — BRCA1","Li-Fraumeni 症候群 — PTEN"]},{"q":"膀胱癌で誤っているのはどれか","ans":[0],"opts":["腺癌が多い","男性に多い","高齢者に多い","多発発生する","初発症状は血尿が多い"]},{"q":"赤血球で正しいのはどれか","ans":[4],"opts":["ヘムには 3 価の鉄原子が含まれる","老朽化した赤血球は変形しやすい","網赤血球は成熟赤血球よりも小さい","ヘムは代謝によりピリミジンと鉄に分解される","酸素分圧が低下するとヘモグロビンの酸素飽和度は低下する"]},{"q":"急性骨髄性白血病と慢性骨髄性白血病で異なるのはどれか","ans":[1],"opts":["CD13 陽性","白血病裂孔","骨髄芽球の出現","特定遺伝子の転座","ペルオキシダーゼ染色陽性"]},{"q":"線溶因子はどれか","ans":[2],"opts":["FDP","フィブリノゲン","プラスミノゲン","プロトロンビン","アンチトロンビン"]},{"q":"第 Ⅺ 因子で正しいのはどれか","ans":[0],"opts":["創傷治癒に関係する","欠損症で APTT が延長する","蛋白分解酵素の前駆体である","活性化第 Ⅹ 因子により活性化される","フィブリン γ 鎖間に架橋結合をもたらす"]},{"q":"APTT が延長しない薬剤はどれか","ans":[1],"opts":["ヘパリン","アスピリン","直接抗 Xa 薬","ワルファリン","直接抗トロンビン薬"]},{"q":"染色体異常とそれに伴う融合遺伝子との組合せで正しいのはどれ か","ans":[3],"opts":["t(8;21)(q22;q22) — CBFB::MYH11","t(9;11)(p21.3;q23.3) — BCR::ABL1","t(9;22)(q34;q11.2) — MLL T3::KMT2A","t(15;17)(q22;q12) — PML::RARA","inv(16)(p13.1;q22) — RUNX1::RUNX1T1"]},{"q":"Cryptococcus neoformans の莢膜の観察に適するのはどれか","ans":[0],"opts":["墨汁法","Hiss 法","Wirtz 法","Neisser 法","Hucker 変法"]},{"q":"RNA ウイルスはどれか","ans":[0,3],"opts":["コロナウイルス","B 型肝炎ウイルス","サイトメガロウイルス","インフルエンザウイルス","ヒトパピローマウイルス"]},{"q":"蛋白合成阻害作用を有する抗菌薬はどれか","ans":[2],"opts":["キノロン系","ペニシリン系","マクロライド系","グリコペプチド系","ホスホマイシン系"]},{"q":"らせん菌はどれか","ans":[2],"opts":["Actinomyces israelii","Bordetella pertussis","Helicobacter pylori","Listeria monocytogenes","Mycoplasma pneumoniae"]},{"q":"Hucker 変法に用いるのはどれか","ans":[0],"opts":["サフラニン","メチレン青","ビクトリア青","石炭酸フクシン","アセトン・エタノール"]},{"q":"プラスミドで正しいのはどれか","ans":[2],"opts":["ウイルスが保有する","一本鎖の RNA である","接合によって伝達する","染色体内に含まれる遺伝因子である","ゲノム上を転移できる塩基配列である"]},{"q":"Streptococcus pyogenes で正しいのはどれか","ans":[3],"opts":["バシトラシン耐性である","カタラーゼ試験陽性である","α 溶血のコロニーを形成する","pyrrolidonyl arylamidase（PYR）試験陰性である"]},{"q":"ヒトの粘膜の消毒に用いるのはどれか","ans":[0],"opts":["逆性石鹸","クレゾール石鹸","グルタルアルデヒド","消毒用エタノール","次亜塩素酸ナトリウム"]},{"q":"二形性真菌はどれか","ans":[4],"opts":["Aspergillus fumigatus","Candida albicans","Exophiala dermatitidis","Microsporum canis","Sporothrix schenckii"]},{"q":"抗原提示細胞はどれか","ans":[2],"opts":["好酸球","NK 細胞","樹状細胞","肥満細胞","ヘルパー T 細胞"]},{"q":"標識免疫測定法で正しいのはどれか","ans":[2],"opts":["化学発光免疫測定法は散乱光を測定する","不均一測定法は B/F 分離を必要としない","均一測定法はハプテンの定量に用いられる","蛍光免疫測定法は励起光の強度を測定する","生物発光免疫測定法にはルテニウム錯体が用いられる"]},{"q":"食細胞機能が障害されるのはどれか","ans":[0],"opts":["慢性肉芽腫症","DiGeorge 症候群","重症複合免疫不全症","無 γ-グロブリン血症","Wiskott-Aldrich 症候群"]},{"q":"抗体のがん抗原結合部分と T 細胞刺激伝達分子を融合させたキメラ 抗原受容体でがん細胞を攻撃する治療法はどれか","ans":[1],"opts":["減感作療法","CAR-T 療法","中和抗体療法","分子標的療法","ステロイドパルス療法"]},{"q":"溶解反応を原理とする検査はどれか","ans":[3,4],"opts":["寒冷凝集反応","RPR カードテスト","直接抗グロブリン試験","血清補体価（CH50）測定","Donath-Landsteiner 試験"]},{"q":"ABO 血液型抗原で正しいのはどれか","ans":[1],"opts":["発現は赤血球膜上に限局している","遺伝子は第 9 染色体の長腕に存在する","A1 型の抗原発現量は成人より新生児の方が多い","A 遺伝子は B 遺伝子に対して潜性（劣性）である","B 型は N-アセチルガラクトサミンと結合している"]},{"q":"ABO 血液型検査で正しいのはどれか","ans":[3],"opts":["ウラ検査はスライド法で行う","ウラ検査は 37℃ で反応させる","オモテ検査の試薬は 2 滴滴下する","ウラ検査は血漿（血清）を 2 滴滴下する","オモテ検査の試験管法は 10% 赤血球浮遊液を作製する"]},{"q":"血液製剤と外観検査項目との関係で誤っているのはどれか","ans":[3],"opts":["血小板製剤 — 凝固物","血小板製剤 — 色調","赤血球製剤 — 溶血","新鮮凍結血漿 — スワーリング","新鮮凍結血漿 — 融解時の異物"]},{"q":"抗 HLA 抗体が関与する疾患または病態はどれか","ans":[1],"opts":["輸血後紫斑病（PTP）","血小板輸血不応（PTR）","自己免疫性溶血性貧血（AIHA）","特発性血小板減少性紫斑病（ITP）","血栓性血小板減少性紫斑病（TTP）"]},{"q":"2022 年（令和 4 年）の国民生活基礎調査で、有訴者率が男女とも 第 1 位だった症状はどれか","ans":[2],"opts":["頭痛","頻尿","腰痛","鼻づまり","目のかすみ"]},{"q":"食事バランスガイド（厚生労働省・農林水産省決定）における主菜 はどれか","ans":[3],"opts":["ごはん","チーズ","みかん","焼き魚","野菜サラダ"]},{"q":"労災保険（労働者災害補償保険）で正しいのはどれか","ans":[4],"opts":["保険料は労働者が負担する","通勤中の負傷は対象外である","パート職員は給付対象外である","治療費の自己負担割合は 3 割である","業務上の事由による障害は対象である"]},{"q":"予防接種で不活化ワクチンが使用されているのはどれか","ans":[3],"opts":["黄熱","風疹","麻疹","日本脳炎","流行性耳下腺炎"]},{"q":"国勢調査で分かるのはどれか","ans":[3],"opts":["粗死亡率","平均寿命","総再生産率","老年化指数","合計特殊出生率"]},{"q":"バイポーラトランジスタで正しいのはどれか","ans":[4],"opts":["MOS 型が存在する","端子名にゲートがある","pn 接合面は一つである","電圧制御型の素子である"]},{"q":"臨床検査システム（LIS）で扱われる大量の検査データを効率的に取 り扱う仕組みはどれか","ans":[3],"opts":["ウェブブラウザ","オフィススイート","オペレーティングシステム","データベース管理システム","プログラミング言語"]},{"q":"入力された信号を 1000 倍にする増幅器がある。この増幅器の利得 ［dB］はどれか","ans":[3],"opts":["10","20","40","60","80"]},{"q":"ME 機器の耐除細動形 CF 形装着部を表す図記号はどれか","ans":[4],"opts":["四角の中に人の形＋四角枠（耐除細動 CF 形）","B 形装着部記号","BF 形装着部記号","CF 形装着部記号","等電位化記号"]},{"q":"超音波検査における吸収（減衰係数）が最も大きいのはどれか","ans":[1],"opts":["筋肉","空気","血液","脂肪","水"]},{"q":"商用交流による皮膚表面での最小感知電流とされる電流［mA］は どれか","ans":[1],"opts":["0.1","1","10","100","1,000"]},{"q":"採血時のパンピング（何度も手を握ったり開いたりを繰り返す動作） で偽高値になるのはどれか","ans":[1],"opts":["リン","カリウム","クロール","カルシウム","ナトリウム"]},{"q":"尿試験紙法で酵素法を原理とするのはどれか","ans":[3],"opts":["蛋白","亜硝酸塩","ケトン体","グルコース","ビリルビン"]},{"q":"経口摂取した薬剤と便の色調の組合せで正しいのはどれか","ans":[3],"opts":["鉄剤 — 赤色","蒼鉛 — 白色","葉緑素製剤 — 黒色","硫酸バリウム — 白色","ケイ酸アルミニウム — 黒色"]},{"q":"染色体検査における細胞培養または標本作製の過程でコルセミドを添 加する理由はどれか","ans":[4],"opts":["赤血球の溶解","細菌の増殖抑制","有核細胞の固定","有核細胞の膨化","紡錘糸の形成阻害"]},{"q":"PCR 法でアニーリングの至適温度に影響を与えるのはどれか","ans":[2],"opts":["pH","dNTP 濃度","プライマーの塩基数","DNA ポリメラーゼ濃度","マグネシウムイオン濃度"]},{"q":"健常成人の髄液所見はどれか。ただし、同時測定の血漿中グルコース 濃度は 100 mg/dL であった","ans":[4],"opts":["色調：黄色透明","細胞数：20 個/μL","蛋白質：100 mg/dL","クロール：160 mmol/L","グルコース：70 mg/dL"]},{"q":"ISO 15189 で誤っているのはどれか","ans":[0],"opts":["国内規格である","リスクマネジメントについて記載している","検査の質の継続的な改善を進める規格である","品質マネジメントについての要求事項が含まれる","臨床検査室の品質管理能力に関する要求事項が含まれる"]},{"q":"X̅-R 管理図法で管理するのはどれか","ans":[1,3],"opts":["施設間差","標準液の劣化","検体採取の過誤","分析機器の異常","パニック値の検出"]},{"q":"ウイルス感染が発症原因の血液疾患はどれか","ans":[2],"opts":["急性骨髄性白血病","骨髄異形成症候群","成人 T 細胞性白血病/リンパ腫（ATLL）","多発性骨髄腫","慢性リンパ性白血病"]},{"q":"慢性骨髄性白血病にみられる染色体異常はどれか","ans":[2],"opts":["t(8;14)(q24;q32)","t(8;21)(q22;q22)","t(9;22)(q34;q11.2)","t(14;18)(q32;q21)","t(15;17)(q22;q12)"]},{"q":"一過性に脳全体が虚血状態になって起こる意識障害はどれか","ans":[3],"opts":["傾眠","昏睡","昏迷","失神","せん妄"]},{"q":"呼気延長を呈するのはどれか","ans":[2],"opts":["胸膜炎","間質性肺炎","気管支喘息","細菌性肺炎","過換気症候群"]},{"q":"腎前性急性腎不全の原因になるのはどれか","ans":[0],"opts":["敗血症","尿管結石","前立腺肥大","急速進行性糸球体腎炎","全身性エリテマトーデス（SLE）"]},{"q":"疾患と超音波所見の組合せで誤っているのはどれか","ans":[3],"opts":["高血圧性心疾患 — 左室の求心性肥大","心房中隔欠損症 — 右房の拡大","僧帽弁狭窄症 — 僧帽弁のドーミング","大動脈弁狭窄症 — 左室壁の菲薄化","肺高血圧症 — 右室の拡大"]},{"q":"下肢静脈の超音波検査で誤っているのはどれか","ans":[3],"opts":["主にリニア型プローブを使用する","圧迫法では静脈の虚脱の有無を確認する","バルサルバ法は吸気後に息ごらえをする","カラードプラ法では流速レンジを上げて血流を確認する","ミルキング法はプローブより末梢側を握って放し血流を誘発させる。"]},{"q":"機能からみた場合の脳幹に含まれないのはどれか","ans":[3],"opts":["橋","延髄","間脳","小脳","中脳"]},{"q":"MRI 検査で脳脊髄液が高信号となる撮像法はどれか","ans":[2],"opts":["FLAIR","T1 強調画像","T2 強調画像","拡散強調画像","プロトン密度強調画像"]},{"q":"ヘモグロビン酸素解離曲線で正しいのはどれか","ans":[4],"opts":["横軸は時間である","縦軸は PaO2 である","体温上昇で左方偏移する","アルカレミアで右方偏移する","右方偏移すると末梢組織での酸素放出が増える"]},{"q":"健常者のレム睡眠時にみられる睡眠ポリグラフィ（PSG）の所見は どれか","ans":[3],"opts":["K-複合","紡錘波","高振幅徐波","急速眼球運動","オトガイ筋表面筋電図振幅上昇"]},{"q":"細胞内小器官で糖鎖の付加を行うのはどれか","ans":[2],"opts":["核","中心体","ゴルジ装置","リソソーム","ミトコンドリア"]},{"q":"グリコーゲンを貯蔵する主な組織はどれか","ans":[1],"opts":["脳","筋肉","脂肪","小腸","腎臓"]},{"q":"血清を試料として定量可能なのはどれか","ans":[4],"opts":["ACTH","ADH","BNP","PTH","TSH"]},{"q":"500 nm の余色（補色）はどれか","ans":[1],"opts":["青","赤","橙","緑","紫"]},{"q":"アンモニアで正しいのはどれか","ans":[4],"opts":["腎臓で無毒化される","核酸から生合成される","血漿中では蛋白に結合して存在する","ウレアーゼ-GLDH 法によって測定される","臨床検査ではアンモニア窒素濃度として表示する"]},{"q":"脂質代謝で誤っているのはどれか","ans":[0],"opts":["ケトン体は胆汁酸の原料となる","リン脂質は細胞膜の構成成分である","血漿中のコレステロールはエステル型が多い","血漿中の遊離脂肪酸はアルブミンと結合している","トリグリセライドはカイロミクロンの主要な脂質である"]},{"q":"日本臨床化学会（JSCC）勧告法による酵素活性測定で 340 nm の吸 光度増加を測定するのはどれか","ans":[3],"opts":["ALP","AST","ChE","CK","γ-GT"]},{"q":"脂溶性ビタミンはどれか","ans":[4],"opts":["チアミン","コバラミン","リボフラビン","アスコルビン酸","カルシフェロール"]},{"q":"ナトリウムを測定する電極はどれか","ans":[0,1],"opts":["ガラス","クラウンエーテル","酵素","第 4 級アンモニウム塩","バリノマイシン"]},{"q":"アルブミンで正しいのはどれか","ans":[0],"opts":["血清中濃度は座位よりも臥位で低くなる","Rapid Turnover Protein（RTP）に分類される","尿中微量アルブミン濃度は色素結合法で測定する","ブロムクレゾールパープル（BCP）法は γ-グロブリンとの反応性が高 い","ブロムクレゾールグリーン（BCG）改良法が血清中濃度測定で使用さ れている。"]},{"q":"血漿カルシウム高値かつ PTH 低値となる疾患はどれか","ans":[1],"opts":["慢性腎臓病","悪性腫瘍の骨転移","ビタミン D 欠乏症","偽性副甲状腺機能低下症","原発性副甲状腺機能亢進症"]},{"q":"脳性ナトリウム利尿ペプチド（BNP）で正しいのはどれか","ans":[1],"opts":["血管を収縮させる","心室で合成される","100 個のアミノ酸で構成される","ナトリウムの再吸収を促進する","採血後の血漿中濃度は室温で安定である"]},{"q":"転移酵素はどれか","ans":[0,2],"opts":["AL T","ChE","CK","LD","LIP"]},{"q":"便中カルプロテクチンで正しいのはどれか","ans":[4],"opts":["抗腫瘍効果を有する","食事の影響を受ける","室温では不安定である","腸内細菌から分泌される","潰瘍性大腸炎の病勢の評価として測定される"]},{"q":"ゲル濾過クロマトグラフィで溶出の順番が最も遅いリポ蛋白はどれ か","ans":[1],"opts":["カイロミクロン","高比重リポ蛋白（HDL）","中間比重リポ蛋白（IDL）","低比重リポ蛋白（LDL）","超低比重リポ蛋白（VLDL）"]},{"q":"ATP 産生に関与しないのはどれか","ans":[4],"opts":["β 酸化","嫌気的解糖","電子伝達系","クエン酸回路","尿素サイクル"]},{"q":"脱灰で誤っているのはどれか","ans":[2],"opts":["温度が高いほど脱灰速度が速い","組織は脱灰液の上層ないし中層に置く","プランク・リクロ液には硫酸が含まれる","脱灰後の中和には硫酸ナトリウムを用いる","EDTA 液は免疫組織化学染色を目的とした場合に用いる"]},{"q":"PAS 反応で正しいのはどれか","ans":[3],"opts":["シッフ試薬の作製には濃硫酸を用いる","シッフ試薬には酸性フクシンが含まれる","シッフ試薬の効力の確認には 95% エタノールを用いる","グリコーゲン検出の場合セロイジン被膜法が有効である","ボイルドシッフ試薬に比べコールドシッフ試薬は染色性が弱い"]},{"q":"ホルマリン固定パラフィン包埋標本を用いた酵素抗体法の内因性ペ ルオキシダーゼをブロックする試薬はどれか","ans":[4],"opts":["EDTA","カゼイン溶液","正常動物血清","クエン酸緩衝液","過酸化水素加メタノール"]},{"q":"染色体数の異常を伴うのはどれか","ans":[2],"opts":["Wilson 病","Marfan 症候群","Klinefelter 症候群","von Hippel-Lindau 病","Duchenne 型筋ジストロフィー"]},{"q":"類上皮細胞肉芽腫を形成する疾患はどれか","ans":[3],"opts":["化膿性肺炎","間質性肺炎","偽膜性腸炎","サルコイドーシス","線維素性心外膜炎"]},{"q":"組織と胚葉の組合せで正しいのはどれか","ans":[3],"opts":["筋肉 — 外胚葉","血管 — 外胚葉","脊髄 — 中胚葉","肺胞 — 中胚葉","甲状腺 — 内胚葉"]},{"q":"糖尿病で正しいのはどれか","ans":[2],"opts":["解糖系が促進する","糖新生は抑制される","早期から尿量が減少する","ケトン体の産生が亢進する","2 型糖尿病は膵島 β 細胞の破壊に起因する"]},{"q":"潰瘍性大腸炎で正しいのはどれか","ans":[4],"opts":["回盲部に多い","胃がんの合併が多い","陰部潰瘍を合併する","高齢者での発症が多い","組織学的には陰窩膿瘍を特徴とする"]},{"q":"ピクリン酸を含む固定液はどれか","ans":[1],"opts":["ブアン液","カルノア液","20% ホルマリン","2% オスミウム酸液","Periodate-lysine-paraformaldehyde（PLP）液"]},{"q":"炎症性肉芽組織に出現しない細胞はどれか","ans":[3],"opts":["好中球","リンパ球","線維芽細胞","平滑筋細胞","血管内皮細胞"]},{"q":"遺伝性腫瘍とその原因遺伝子の組合せで正しいのはどれか","ans":[1,2],"opts":["遺伝性乳癌卵巣癌症候群 — RB","家族性大腸腺腫症 — APC","網膜芽細胞腫 — RET","Cowden 病 — BRCA1","Li-Fraumeni 症候群 — PTEN"]},{"q":"膀胱癌で誤っているのはどれか","ans":[2],"opts":["腺癌が多い","男性に多い","高齢者に多い","多発発生する","初発症状は血尿が多い"]},{"q":"赤血球で正しいのはどれか","ans":[1],"opts":["ヘムには 3 価の鉄原子が含まれる","老朽化した赤血球は変形しやすい","網赤血球は成熟赤血球よりも小さい","ヘムは代謝によりピリミジンと鉄に分解される","酸素分圧が低下するとヘモグロビンの酸素飽和度は低下する"]},{"q":"急性骨髄性白血病と慢性骨髄性白血病で異なるのはどれか","ans":[4],"opts":["CD13 陽性","白血病裂孔","骨髄芽球の出現","特定遺伝子の転座","ペルオキシダーゼ染色陽性"]},{"q":"線溶因子はどれか","ans":[0,2],"opts":["FDP","フィブリノゲン","プラスミノゲン","プロトロンビン","アンチトロンビン"]},{"q":"第 Ⅺ 因子で正しいのはどれか","ans":[0],"opts":["創傷治癒に関係する","欠損症で APTT が延長する","蛋白分解酵素の前駆体である","活性化第 Ⅹ 因子により活性化される","フィブリン γ 鎖間に架橋結合をもたらす"]},{"q":"APTT が延長しない薬剤はどれか","ans":[1,3],"opts":["ヘパリン","アスピリン","直接抗 Xa 薬","ワルファリン","直接抗トロンビン薬"]},{"q":"染色体異常とそれに伴う融合遺伝子との組合せで正しいのはどれ か","ans":[2],"opts":["t(8;21)(q22;q22) — CBFB::MYH11","t(9;11)(p21.3;q23.3) — BCR::ABL1","t(9;22)(q34;q11.2) — MLL T3::KMT2A","t(15;17)(q22;q12) — PML::RARA","inv(16)(p13.1;q22) — RUNX1::RUNX1T1"]},{"q":"Cryptococcus neoformans の莢膜の観察に適するのはどれか","ans":[4],"opts":["墨汁法","Hiss 法","Wirtz 法","Neisser 法","Hucker 変法"]},{"q":"RNA ウイルスはどれか","ans":[2],"opts":["コロナウイルス","B 型肝炎ウイルス","サイトメガロウイルス","インフルエンザウイルス","ヒトパピローマウイルス"]},{"q":"蛋白合成阻害作用を有する抗菌薬はどれか","ans":[1],"opts":["キノロン系","ペニシリン系","マクロライド系","グリコペプチド系","ホスホマイシン系"]},{"q":"らせん菌はどれか","ans":[2,4],"opts":["Actinomyces israelii","Bordetella pertussis","Helicobacter pylori","Listeria monocytogenes","Mycoplasma pneumoniae"]},{"q":"Hucker 変法に用いるのはどれか","ans":[2],"opts":["サフラニン","メチレン青","ビクトリア青","石炭酸フクシン","アセトン・エタノール"]},{"q":"プラスミドで正しいのはどれか","ans":[1,4],"opts":["ウイルスが保有する","一本鎖の RNA である","接合によって伝達する","染色体内に含まれる遺伝因子である","ゲノム上を転移できる塩基配列である"]},{"q":"Streptococcus pyogenes で正しいのはどれか","ans":[3],"opts":["バシトラシン耐性である","カタラーゼ試験陽性である","α 溶血のコロニーを形成する","Lancefield 分類 A 群に属する","pyrrolidonyl arylamidase（PYR）試験陰性である。"]},{"q":"ヒトの粘膜の消毒に用いるのはどれか","ans":[0],"opts":["逆性石鹸","クレゾール石鹸","グルタルアルデヒド","消毒用エタノール","次亜塩素酸ナトリウム"]},{"q":"二形性真菌はどれか","ans":[3],"opts":["Aspergillus fumigatus","Candida albicans","Exophiala dermatitidis","Microsporum canis","Sporothrix schenckii"]},{"q":"抗原提示細胞はどれか","ans":[3],"opts":["好酸球","NK 細胞","樹状細胞","肥満細胞","ヘルパー T 細胞"]},{"q":"標識免疫測定法で正しいのはどれか","ans":[1],"opts":["化学発光免疫測定法は散乱光を測定する","不均一測定法は B/F 分離を必要としない","均一測定法はハプテンの定量に用いられる","蛍光免疫測定法は励起光の強度を測定する","生物発光免疫測定法にはルテニウム錯体が用いられる"]},{"q":"食細胞機能が障害されるのはどれか","ans":[1],"opts":["慢性肉芽腫症","DiGeorge 症候群","重症複合免疫不全症","無 γ-グロブリン血症","Wiskott-Aldrich 症候群"]},{"q":"抗体のがん抗原結合部分と T 細胞刺激伝達分子を融合させたキメラ 抗原受容体でがん細胞を攻撃する治療法はどれか","ans":[0],"opts":["減感作療法","CAR-T 療法","中和抗体療法","分子標的療法","ステロイドパルス療法"]},{"q":"溶解反応を原理とする検査はどれか","ans":[2],"opts":["寒冷凝集反応","RPR カードテスト","直接抗グロブリン試験","血清補体価（CH50）測定","Donath-Landsteiner 試験"]},{"q":"ABO 血液型抗原で正しいのはどれか","ans":[0],"opts":["発現は赤血球膜上に限局している","遺伝子は第 9 染色体の長腕に存在する","A1 型の抗原発現量は成人より新生児の方が多い","A 遺伝子は B 遺伝子に対して潜性（劣性）である","B 型は N-アセチルガラクトサミンと結合している"]},{"q":"ABO 血液型検査で正しいのはどれか","ans":[3],"opts":["ウラ検査はスライド法で行う","ウラ検査は 37℃ で反応させる","オモテ検査の試薬は 2 滴滴下する","ウラ検査は血漿（血清）を 2 滴滴下する","オモテ検査の試験管法は 10% 赤血球浮遊液を作製する"]},{"q":"血液製剤と外観検査項目との関係で誤っているのはどれか","ans":[3],"opts":["血小板製剤 — 凝固物","血小板製剤 — 色調","赤血球製剤 — 溶血","新鮮凍結血漿 — スワーリング","新鮮凍結血漿 — 融解時の異物"]},{"q":"抗 HLA 抗体が関与する疾患または病態はどれか","ans":[1],"opts":["輸血後紫斑病（PTP）","血小板輸血不応（PTR）","自己免疫性溶血性貧血（AIHA）","特発性血小板減少性紫斑病（ITP）","血栓性血小板減少性紫斑病（TTP）"]},{"q":"2022 年（令和 4 年）の国民生活基礎調査で、有訴者率が男女とも 第 1 位だった症状はどれか","ans":[4],"opts":["頭痛","頻尿","腰痛","鼻づまり","目のかすみ"]},{"q":"食事バランスガイド（厚生労働省・農林水産省決定）における主菜 はどれか","ans":[1],"opts":["ごはん","チーズ","みかん","焼き魚","野菜サラダ"]},{"q":"労災保険（労働者災害補償保険）で正しいのはどれか","ans":[4],"opts":["保険料は労働者が負担する","通勤中の負傷は対象外である","パート職員は給付対象外である","治療費の自己負担割合は 3 割である","業務上の事由による障害は対象である"]},{"q":"予防接種で不活化ワクチンが使用されているのはどれか","ans":[2],"opts":["黄熱","風疹","麻疹","日本脳炎","流行性耳下腺炎"]},{"q":"国勢調査で分かるのはどれか","ans":[1],"opts":["粗死亡率","平均寿命","総再生産率","老年化指数","合計特殊出生率"]},{"q":"バイポーラトランジスタで正しいのはどれか","ans":[1],"opts":["MOS 型が存在する","端子名にゲートがある","pn 接合面は一つである","電圧制御型の素子である","動作には自由電子と正孔（ホール）の両方が関与する。"]},{"q":"臨床検査システム（LIS）で扱われる大量の検査データを効率的に取 り扱う仕組みはどれか","ans":[3],"opts":["ウェブブラウザ","オフィススイート","オペレーティングシステム","データベース管理システム","プログラミング言語"]},{"q":"入力された信号を 1000 倍にする増幅器がある。この増幅器の利得 ［dB］はどれか","ans":[1],"opts":["10","20","40","60","80"]},{"q":"ME 機器の耐除細動形 CF 形装着部を表す図記号はどれか","ans":[3,4],"opts":["四角の中に人の形＋四角枠（耐除細動 CF 形）","B 形装着部記号","BF 形装着部記号","CF 形装着部記号","等電位化記号"]}],"地獄級":[]};
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div class="container" id="main-container">
+  <div id="maker-screen" style="display: none;">
+    <h2>🔧 知識の迷宮をつくる</h2>
+
+    <div id="excel-dropzone" class="dropzone">
+      <div style="font-size:36px;">📊</div>
+      <div style="font-weight:bold; margin-top:5px;">Excel/CSVファイルをドラッグ&amp;ドロップ</div>
+      <div style="font-size:12px; color:#aaa; margin-top:5px;">またはタップしてファイルを選択（.xlsx / .xls / .csv）</div>
+      <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" style="display:none;">
+    </div>
+    <div id="excel-preview" style="font-size: 12px; text-align: left; background: var(--bg-void); padding: 10px 12px; border-radius: 3px; border: 1px solid var(--line); margin-bottom: 10px; display: none; font-family: var(--font-mono); line-height: 1.6;"></div>
+    <button class="btn" style="background:#2980b9; font-size:13px; padding:8px;" onclick="downloadTemplate()">📥 Excelテンプレートをダウンロード</button>
+
+    <div style="text-align:center; color:#888; font-size:12px; margin:15px 0;">- または，タブ区切りテキストで直接入力 -</div>
+
+    <textarea id="import-text" placeholder="[分類(空欄可)] [問題] [正解番号(1,3等)] [選択肢1] [選択肢2]... (タブ区切り)"></textarea>
+    <button class="btn btn-maker" onclick="exportGame()">🎉 ゲーム(HTML)を出力して保存</button>
+  </div>
+
+  <div id="race-screen" style="display: none;">
+    <h2>① 種族を選ぼう</h2>
+    <div id="race-grid" class="avatar-grid"><button class="avatar-card"><span class="avatar-icon">🧑</span><span class="avatar-name">人間</span></button><button class="avatar-card"><span class="avatar-icon">🧝</span><span class="avatar-name">エルフ</span></button><button class="avatar-card"><span class="avatar-icon">🧔</span><span class="avatar-name">ドワーフ</span></button><button class="avatar-card"><span class="avatar-icon">👹</span><span class="avatar-name">鬼族</span></button><button class="avatar-card"><span class="avatar-icon">👼</span><span class="avatar-name">天使</span></button><button class="avatar-card"><span class="avatar-icon">🤖</span><span class="avatar-name">アンドロイド</span></button></div>
+    <button class="btn" id="btn-race-cancel" style="display:none; background:var(--bg-panel-3);" onclick="cancelCharEdit()">戻る（変更しない）</button>
+  </div>
+
+  <div id="char-screen" style="display: none;">
+    <h2 id="char-title">② 職業を選ぼう</h2>
+    <input type="text" id="char-name" placeholder="名前を入力してください">
+    <div id="class-grid" class="avatar-grid"><button class="avatar-card"><span class="avatar-icon">⚔️</span><span class="avatar-name">剣士</span></button><button class="avatar-card"><span class="avatar-icon">🪄</span><span class="avatar-name">魔法使い</span></button><button class="avatar-card"><span class="avatar-icon">🛡️</span><span class="avatar-name">重戦士</span></button><button class="avatar-card"><span class="avatar-icon">🏹</span><span class="avatar-name">弓使い</span></button></div>
+    <button class="btn" id="btn-char-cancel" style="display:none; background:var(--bg-panel-3);" onclick="cancelCharEdit()">戻る（変更しない）</button>
+  </div>
+
+  <div id="mode-screen" style="display: none;">
+    <button class="btn-reset" onclick="resetAllData()">データリセット</button>
+    <h1 style="margin-bottom:8px;">知識の迷宮</h1>
+    <div style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.3em; color:var(--text-fade); margin-bottom:20px; text-transform:uppercase;">Knowledge Dungeon</div>
+
+    <div class="player-panel">
+      <div class="equip-display" id="disp-equip">装備: なし</div>
+      <div class="player-title" id="disp-title">【見習い】</div>
+      <div class="player-name"><span id="disp-icon"></span> <span id="disp-name"></span></div>
+      <div style="font-family:var(--font-mono); font-size:12px; letter-spacing:0.08em; color:var(--text-dim);">
+        LV <strong style="color:var(--text); font-size:14px;"><span id="disp-lv">1</span></strong>
+        &nbsp;·&nbsp; KILLS <strong style="color:var(--text);"><span id="disp-kills">0</span></strong>
+      </div>
+      <div style="font-family:var(--font-mono); font-size:10px; color:var(--text-fade); margin-top:4px; letter-spacing:0.05em;" id="disp-next-title"></div>
+      <div class="exp-bar-bg"><div class="exp-bar-fill" id="disp-exp-bar"></div></div>
+      <div style="font-family:var(--font-mono); font-size:10px; text-align:right; margin-top:3px; color:var(--text-fade); letter-spacing:0.1em;">EXP <span id="disp-exp">0</span> / <span id="disp-next">10</span></div>
+      <div class="coin-display">💰 <span id="disp-coins">0</span></div>
+    </div>
+
+    <div id="dungeon-tab-wrap"></div>
+    <div id="dungeon-mode-list" class="mode-list" style="display:none; margin-top:8px;"></div>
+
+    <div class="lab-label" style="margin:16px 2px 6px;">Special Modes</div>
+    <div id="special-mode-list" class="mode-list"></div>
+    <div class="sub-actions">
+      <button class="btn" onclick="showTreeScreen()">🧬 スキル / 装備</button>
+      <button class="btn btn-shop" onclick="showShopScreen()">🛒 ショップ</button>
+    </div>
+    <div class="sub-actions">
+      <button class="btn btn-review" onclick="showGlobalHistory()">📖 解答ログ</button>
+      <button class="btn" onclick="showStatusScreen()">📊 ステータス</button>
+    </div>
+    <button class="btn" style="margin-top:8px; background:var(--bg-panel-3);" onclick="openCharEdit()">⚙️ キャラクター設定を変更</button>
+  </div>
+  
+  <div id="shop-screen" style="display: none;">
+    <h2>🛒 ショップ</h2>
+    <div class="stat-card" style="margin-bottom:14px;">
+      <div class="lab-label">Coin Balance</div>
+      <div style="font-family:var(--font-mono); font-size:26px; color:var(--accent-amber); font-weight:700; letter-spacing:0.05em;">💰 <span id="shop-coins">0</span></div>
+    </div>
+
+    <div class="tree-box">
+      <div style="display:flex; justify-content:space-between; align-items:baseline;">
+        <strong>📦 通常アイテムガチャ</strong>
+        <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-fade); letter-spacing:0.1em;">50 COIN</span>
+      </div>
+      <button class="btn" style="margin-top:8px;" onclick="buyGacha('n', 50)">回す</button>
+      <div id="shop-unowned-n" style="font-size:11px; color:var(--text-fade); margin-top:6px; font-family:var(--font-mono); letter-spacing:0.05em;"></div>
+    </div>
+
+    <div class="tree-box" style="border-left-color:var(--accent-cyan);">
+      <div style="display:flex; justify-content:space-between; align-items:baseline;">
+        <strong>🌟 レアアイテムガチャ</strong>
+        <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-fade); letter-spacing:0.1em;">200 COIN</span>
+      </div>
+      <button class="btn" style="margin-top:8px;" onclick="buyGacha('r', 200)">回す</button>
+      <div id="shop-unowned-r" style="font-size:11px; color:var(--text-fade); margin-top:6px; font-family:var(--font-mono); letter-spacing:0.05em;"></div>
+    </div>
+
+    <div id="shop-result" style="margin-top:14px; font-weight:bold; min-height:40px; font-family:var(--font-mono); font-size:13px;"></div>
+    <button class="btn" style="margin-top:14px;" onclick="returnToMenu()">戻る</button>
+  </div>
+
+  <div id="global-history-screen" style="display: none;">
+    <h2>📖 解答記録 <span id="history-cap-label" style="font-size:13px; color:var(--text-fade); font-family:var(--font-mono);"></span></h2>
+    <div id="global-history-list" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px; text-align: left; font-size:13px;"></div>
+    <button class="btn" onclick="returnToMenu()">戻る</button>
+  </div>
+
+  <div id="status-screen" style="display: none;">
+    <h2>📊 ステータス</h2>
+    <div id="status-content" style="text-align:left; font-size:14px; line-height:1.8;"></div>
+    <button class="btn" style="margin-top:20px;" onclick="returnToMenu()">戻る</button>
+  </div>
+
+  <div id="tree-screen" style="display: none;">
+    <h2>🧬 スキル / 装備</h2>
+    <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <div>
+        <div class="lab-label">Skill Points</div>
+        <div style="font-family:var(--font-mono); font-size:22px; color:var(--accent-viol); font-weight:700;">◆ <span id="disp-sp">0</span></div>
+        <div style="font-size:10px; color:var(--text-fade); font-family:var(--font-mono); letter-spacing:0.1em;">LVUP時に獲得</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="lab-label">Coin</div>
+        <div style="font-family:var(--font-mono); font-size:20px; color:var(--accent-amber); font-weight:700;">💰 <span id="tree-coins">0</span></div>
+      </div>
+    </div>
+
+    <div class="tree-box">
+      <strong>💡 選択肢消去</strong> <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-fade); letter-spacing:0.05em;">Lv <span id="skill-eliminate">0</span> / MAX 1</span><br>
+      <span style="font-size:12px; color:var(--text-dim); line-height:1.5;">習得すると，1戦闘につき1回，不正解の選択肢を1つ消去できるようになります</span><br>
+      <button class="btn" id="btn-up-elim" style="margin-top:8px; font-size:13px; padding:8px;" onclick="upgradeSkill('eliminate')">SPを10消費して習得</button>
+    </div>
+
+    <div class="tree-box">
+      <strong>📦 通常ドロップ率UP</strong> <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-fade); letter-spacing:0.05em;">Lv <span id="skill-dropN">0</span> / MAX 10</span><br>
+      <span style="font-size:12px; color:var(--text-dim); line-height:1.5;" id="effect-dropN"></span><br>
+      <button class="btn" id="btn-up-dropN" style="margin-top:8px; font-size:13px; padding:8px;" onclick="upgradeSkill('dropN')">SPを1消費して強化</button>
+    </div>
+
+    <div class="tree-box" style="border-left-color:var(--accent-cyan);">
+      <strong>🌟 レアドロップ率UP</strong> <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-fade); letter-spacing:0.05em;">Lv <span id="skill-dropR">0</span> / MAX 10</span><br>
+      <span style="font-size:12px; color:var(--text-dim); line-height:1.5;" id="effect-dropR"></span><br>
+      <button class="btn" id="btn-up-dropR" style="margin-top:8px; font-size:13px; padding:8px;" onclick="upgradeSkill('dropR')">SPを1消費して強化</button>
+    </div>
+
+    <div class="tree-box" style="border-left-color:var(--rare-sr);">
+      <strong>🔥 超激レアドロップ率UP</strong> <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-fade); letter-spacing:0.05em;">Lv <span id="skill-dropSR">0</span> / MAX 5</span><br>
+      <span style="font-size:12px; color:var(--text-dim); line-height:1.5;" id="effect-dropSR"></span><br>
+      <button class="btn" id="btn-up-dropSR" style="margin-top:8px; font-size:13px; padding:8px;" onclick="upgradeSkill('dropSR')">SPを1消費して強化</button>
+    </div>
+
+    <div class="tree-box" style="border-left-color:var(--accent-lime);">
+      <strong>📖 解答ログ拡張</strong> <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-fade); letter-spacing:0.05em;">Lv <span id="skill-logCap">0</span> / MAX 34</span><br>
+      <span style="font-size:12px; color:var(--text-dim); line-height:1.5;" id="effect-logCap"></span><br>
+      <button class="btn" id="btn-up-logCap" style="margin-top:8px; font-size:13px; padding:8px;" onclick="upgradeSkill('logCap')">SPを1消費して強化</button>
+    </div>
+
+    <h3 style="margin-top:22px;">🎒 所持アイテム</h3>
+    <p style="text-align:right; margin:0; font-family:var(--font-mono); font-size:12px; color:var(--accent-amber); letter-spacing:0.05em;">CATALOG <span id="collection-rate">0</span>%</p>
+    <div id="collection-list" class="collection-box"></div>
+    <button class="btn" style="margin-top:20px;" onclick="returnToMenu()">戻る</button>
+  </div>
+
+  <div id="game-screen" style="display: none;">
+    <div class="status-bar">
+      <div class="life-display" id="live-life">❤️ ❤️ ❤️</div>
+      <div class="score-display">SCORE: <span id="live-score">0</span></div>
+    </div>
+    <div class="mode-line">
+      <span class="mode-tag" id="mode-name"></span>
+      <span id="progress-text"></span>
+      <span id="poison-badge" style="display:none; color:var(--accent-lime); font-family:var(--font-mono); font-size:10px; letter-spacing:0.05em;"></span>
+    </div>
+    <div class="best-score-line" id="best-score-line" style="display:none;">🏆 BEST <span id="live-best-score">0</span></div>
+
+    <div class="battle-area">
+      <div class="player-sprite" id="player-sprite">⚔️</div>
+      <div class="monster-queue" id="monster-queue"></div>
+      <div class="monster-sprite" id="current-monster">👾</div>
+    </div>
+
+    <div class="combo-area">
+      <div class="combo-counter" id="combo-counter"></div>
+    </div>
+
+    <h3 id="quiz-question"></h3>
+    <div id="answer-count-badge" style="display:none; text-align:right; font-family:var(--font-mono); font-size:11px; color:var(--accent-cyan); letter-spacing:0.1em; margin:6px 2px 0;"></div>
+    <div class="options" id="quiz-options"></div>
+    
+    <button id="btn-skill-eliminate" class="btn btn-skill" style="display:none;" onclick="useEliminateSkill(false)">💡 選択肢を1つ消す (残り1回)</button>
+    <button id="btn-item-eliminate" class="btn" style="display:none; background:linear-gradient(180deg, #0891b2 0%, #164e63 100%); border-color:#22d3ee;" onclick="useEliminateSkill(false, true)">🧴 選択肢を1つ消す (残り1回)</button>
+
+    <button id="btn-submit" class="btn btn-submit" onclick="submitAnswer()">解答する</button>
+    <div id="message" style="font-weight: bold; min-height: 48px; margin-top:15px;"></div>
+
+    <button class="btn btn-stop" style="margin-top:20px;" onclick="retireGame()">🏃 逃げる（リタイア）</button>
+  </div>
+
+  <div id="result-screen" style="display: none;">
+    <div id="result-title" class="clear-text"></div>
+    <div id="result-defeated" class="defeated-icons" style="display:none;"></div>
+    <div class="result-box">
+      <div id="result-score"></div>
+      <div id="result-best" style="display:none;"></div>
+      <div id="result-exp"></div>
+      <div id="result-levelup" class="level-up"></div>
+    </div>
+    <button class="btn btn-review" onclick="showReview()">振り返りを見る</button>
+    <button class="btn" onclick="returnToMenu()">メニューに戻る</button>
+  </div>
+
+  <div id="review-screen" style="display: none;">
+    <h2>戦闘の記録</h2>
+    <div id="review-list" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;"></div>
+    <button class="btn" onclick="returnToMenu()">メニューに戻る</button>
+  </div>
+
+</div>
+
+<script>
+  let audioCtx;
+  function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+
+  function playTone(freq, startOffset, duration, type, volume) {
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = type;
+    const t0 = audioCtx.currentTime + startOffset;
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(volume, t0);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+    osc.start(t0); osc.stop(t0 + duration);
+  }
+
+  function playSound(type) {
+    if (!audioCtx) return;
+    if (type === 'hit') {
+      const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.type = 'square'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    } else if (type === 'damage') {
+      const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.5, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+    } else if (type === 'drop') {
+      // アイテムドロップ: 高音のキラキラ2音
+      playTone(1318.5, 0,    0.22, 'sine', 0.18);
+      playTone(1760,   0.06, 0.22, 'sine', 0.15);
+    } else if (type === 'levelup') {
+      // スキルLvアップ: 短い上昇チャイム(ド・ミ・ソ)
+      playTone(523.25, 0,    0.18, 'triangle', 0.25);
+      playTone(659.25, 0.09, 0.18, 'triangle', 0.25);
+      playTone(783.99, 0.18, 0.28, 'triangle', 0.25);
+    } else if (type === 'clear') {
+      // クリア: 上昇アルペジオのファンファーレ
+      playTone(523.25,  0,    0.3, 'square', 0.2);
+      playTone(659.25,  0.12, 0.3, 'square', 0.2);
+      playTone(783.99,  0.24, 0.3, 'square', 0.2);
+      playTone(1046.5,  0.36, 0.5, 'square', 0.22);
+    } else if (type === 'walk') {
+      // 前進時の足音: 1秒間で4回の低いパルス
+      playTone(95, 0,    0.1, 'square', 0.1);
+      playTone(80, 0.28, 0.1, 'square', 0.1);
+      playTone(95, 0.56, 0.1, 'square', 0.1);
+      playTone(80, 0.84, 0.1, 'square', 0.1);
+    } else if (type === 'defeat') {
+      // 討伐失敗: 下降する不穏な旋律
+      playTone(392,    0,   0.35, 'sawtooth', 0.18);
+      playTone(329.63, 0.22, 0.35, 'sawtooth', 0.18);
+      playTone(261.63, 0.44, 0.45, 'sawtooth', 0.2);
+      playTone(196,    0.66, 0.8,  'sawtooth', 0.22);
+    }
+  }
+  
+  // 既存コードにあった未定義呼び出し(hitStop)対策のno-op
+  function hitStop() {}
+
+  // フラッシュを消去し、シンプルなエフェクトに変更
+  function playAttackFx() {
+    const battleArea = document.querySelector('.battle-area');
+    const fx = document.createElement('div');
+    fx.className = 'slash-fx'; fx.innerText = '💥';
+    battleArea.appendChild(fx);
+    setTimeout(() => fx.remove(), 250);
+  }
+
+  function resetAnimation(elementId, animationName, duration, fillMode = '') {
+    const el = document.getElementById(elementId);
+    el.style.animation = 'none';
+    void el.offsetWidth; // リフロー強制
+    el.style.animation = `${animationName} ${duration} ease-out${fillMode ? ' ' + fillMode : ''}`;
+  }
+
+  // 次の敵が奥から近づいてくるような入場演出
+  function playMonsterEnter() {
+    const mSprite = document.getElementById('current-monster');
+    mSprite.style.animation = 'none';
+    mSprite.style.transition = 'none';
+    mSprite.style.opacity = '0';
+    mSprite.style.transform = 'scale(0.3) translateX(50px)';
+    void mSprite.offsetWidth; // リフロー強制
+    mSprite.style.transition = 'opacity 0.35s ease-out, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    mSprite.style.opacity = '1';
+    mSprite.style.transform = 'scale(1) translateX(0)';
+    setTimeout(() => { mSprite.style.transition = 'none'; }, 420);
+  }
+
+  const GAME_MODES = [
+    { id: "kinder",       name: "🐣幼稚園児モード", count: 2,    lives: 5 },
+    { id: "beginner",     name: "🔰初級",           count: 3,    lives: 3 },
+    { id: "intermediate", name: "⚔️中級",           count: 5,    lives: 3 },
+    { id: "advanced",     name: "🔥上級",           count: 10,   lives: 2 },
+    { id: "super",        name: "☠️超級",           count: 20,   lives: 1 },
+    { id: "weakness",     name: "苦手問題モード", count: 10,   lives: 3, color: "#d35400" },
+    { id: "infinite",     name: "無限回路編",     count: 9999, lives: 3 },
+    { id: "training",     name: "訓練モード",     count: 9999, lives: 999 },
+    { id: "hell",         name: "👹🔥地獄級",         count: 10,   lives: 2, hidden: true }
+  ];
+
+  const TITLES = [
+    { kills: 0,    title: "見習い" },
+    { kills: 50,   title: "戦士" },
+    { kills: 150,  title: "熟練戦士" },
+    { kills: 300,  title: "エキスパート" },
+    { kills: 600,  title: "マスター" },
+    { kills: 1000, title: "レジェンド" },
+    { kills: 2000, title: "伝説の英雄" },
+    { kills: 4000, title: "神話級" }
+  ];
+
+  const ITEMS = {
+    // 超激レア (3種)
+    "ring": { name: "偽陽性の指輪", icon: "💍", desc: "不正解時，20%で奇跡的に正解になる", rarity: "sr", sell: 10 },
+    "microscope": { name: "伝説のニュートンリング", icon: "🔬", desc: "アイテムドロップ判定を10回行う", rarity: "sr", sell: 10 },
+    "pcr": { name: "伝説のサーマルサイクラー", icon: "🧬", desc: "スコア・EXP2倍、最大ライフ+1", rarity: "sr", sell: 10 },
+    
+    // レア (6種)
+    "pipette": { name: "黄金のピペットマン", icon: "✨", desc: "通常アイテムドロップ率+5%", rarity: "r", sell: 2 },
+    "centrifuge": { name: "荒ぶる遠心分離機", icon: "🌀", desc: "EXPランダム1.0〜2.0倍", rarity: "r", sell: 2 },
+    "kimwipe": { name: "神聖なるキムワイプ", icon: "🧻", desc: "死んだ時10%で復活", rarity: "r", sell: 2 },
+    "alcohol": { name: "消毒用エタノール", icon: "🧴", desc: "戦闘中1回、好きなタイミングで不正解の選択肢を1つ消去できる", rarity: "r", sell: 2 },
+
+    // 通常 (9種)
+    "agar": { name: "マッコンキー寒天培地", icon: "🧫", desc: "出題時、正答率60%以下の問題がほんの少しだけ出やすくなる", rarity: "n", sell: 1 },
+    "tourniquet": { name: "きつめの駆血帯", icon: "🩹", desc: "残りライフ1でスコア1.5倍", rarity: "n", sell: 1 },
+    "edta": { name: "EDTA入り採血管", icon: "💉", desc: "正解時スコア常に+10pt", rarity: "n", sell: 1 },
+    "slide": { name: "汚れのないスライドガラス", icon: "🔲", desc: "獲得EXP常に+1", rarity: "n", sell: 1 },
+    "petri": { name: "使い捨てペトリ皿", icon: "🍽️", desc: "幼稚園児モードのみ、初期ライフ+1", rarity: "n", sell: 1 },
+    "swab": { name: "コンタミの神", icon: "🥢", desc: "不正解時5%でダメージ無効", rarity: "n", sell: 1 },
+    "mask": { name: "破れたN95マスク", icon: "😷", desc: "獲得スコア1.1倍", rarity: "n", sell: 1 },
+    "gloves": { name: "ニトリルグローブ", icon: "🧤", desc: "獲得EXP1.1倍", rarity: "n", sell: 1 },
+    "gram": { name: "グラム染色液(紫)", icon: "🟣", desc: "コンボ時のスコア倍率ボーナス", rarity: "n", sell: 1 },
+    "serum": { name: "基準値外の血清", icon: "🩸", desc: "EXP1.5倍、初期ライフ-1", rarity: "n", sell: 1 },
+    "incubator": { name: "ぽかぽかインキュベーター", icon: "🌡️", desc: "正解時0.5%でライフ1回復", rarity: "n", sell: 1 }
+  };
+
+  // 伝説アイテム: 意図的にITEMSオブジェクトの外で定義し、図鑑・ガチャ・通常ドロップ抽選のロジックから完全に切り離す。
+  // これにより「所持アイテム」一覧には絶対に表示されず、専用のcheckLegendaryDrop()経由でのみ入手できる。
+  const LEGENDARY_ITEM = {
+    name: "Ultra Ultimate Super Hyper Kami God",
+    icon: "👑",
+    desc: "すべてを手に入れたもの。所持時、常時間違い選択肢が1つまで減少、かつ70%の確率で間違い選択肢を選んでもライフが減らない、かつモンスター討伐時、10体倒したことになる、かつ経験値獲得量が100倍に増加"
+  };
+
+  let player = { name: "", icon: "⚔️", race: "human", raceIcon: "🧑", raceName: "人間", lv: 1, exp: 0, totalKills: 0, coins: 0, skills: { eliminate: 0, dropN: 0, dropR: 0, dropSR: 0, logCap: 0 }, drops: {}, equippedItem: null, history: [], qStats: {}, totalAnswered: 0, totalCorrect: 0, bestCombo: 0, gamesPlayed: 0, hasLegendaryItem: false };
+  let currentModeObj = null; let currentLives = 3; let qCount = 0; let killedCount = 0; let earnedExp = 0; let earnedKills = 0;
+  let normalPool = [], hellPool = []; let enemyQueue = []; let runHistory = []; let currentQData = null; let selectedAnswers = new Set();
+  let combo = 0; let maxCombo = 0; let totalScore = 0;
+  let isEliminateUsed = false; let isItemEliminateUsed = false; let defeatedMonsters = [];
+  let poisonTurns = 0; // 毒状態の残りターン数(この間は回答数ヒントが見えない)
+  const HIDE_ANSWER_COUNT_MODES = ['super', 'hell']; // これらのモードでは常に回答数を隠す
+  let currentPool = []; // 現在のモードの問題プール
+  let currentBestScore = 0; // 無限回路編用のベストスコア
+  let importedRows = null; // Excel/CSVから読み込んだ問題データ(行の配列)
+  const icons = ["💧", "👺", "🗿", "🐉", "👿", "🦠", "🧬"];
+  const hellIcons = ["💀", "👹", "😈", "🧟", "👻", "🦇", "🐍", "🦂", "🕷️", "☠️"]; // 地獄級限定の強敵
+
+  const RACES = [
+    { id: "human",  icon: "🧑", name: "人間" },
+    { id: "elf",    icon: "🧝", name: "エルフ" },
+    { id: "dwarf",  icon: "🧔", name: "ドワーフ" },
+    { id: "oni",    icon: "👹", name: "鬼族" },
+    { id: "angel",  icon: "👼", name: "天使" },
+    { id: "android",icon: "🤖", name: "アンドロイド" }
+  ];
+  const CLASSES = [
+    { id: "warrior", icon: "⚔️", name: "剣士" },
+    { id: "mage",    icon: "🪄", name: "魔法使い" },
+    { id: "tank",    icon: "🛡️", name: "重戦士" },
+    { id: "archer",  icon: "🏹", name: "弓使い" }
+  ];
+  let tempRace = null;      // 種族選択画面で仮選択された種族(職業選択後に確定)
+  let isEditingChar = false; // キャラクター設定変更フローかどうか
+
+  window.onload = () => {
+    buildRaceGrid();
+    buildClassGrid();
+    hideAllScreens(); // 開始時に全画面を確実に非表示にしてから、適切な画面だけを表示する(状態の焼き付き対策)
+
+    const hasQuizData = window.QUIZ_DATA && (
+      (window.QUIZ_DATA["通常"] && window.QUIZ_DATA["通常"].length > 0) ||
+      (window.QUIZ_DATA["地獄級"] && window.QUIZ_DATA["地獄級"].length > 0)
+    );
+
+    if (hasQuizData) {
+      normalPool = window.QUIZ_DATA["通常"] || []; hellPool = window.QUIZ_DATA["地獄級"] || [];
+      loadCharacter();
+    } else {
+      document.getElementById('maker-screen').style.display = "block";
+      initExcelDropzone();
+    }
+  };
+
+  function resetAllData() { if (confirm("全データをリセットしますか？この操作は取り消せません．")) { localStorage.clear(); location.reload(); } }
+
+  function buildRaceGrid() {
+    const grid = document.getElementById('race-grid');
+    grid.innerHTML = "";
+    RACES.forEach(r => {
+      const card = document.createElement('button');
+      card.className = "avatar-card";
+      card.innerHTML = `<span class="avatar-icon">${r.icon}</span><span class="avatar-name">${r.name}</span>`;
+      card.onclick = () => selectRace(r);
+      grid.appendChild(card);
+    });
+  }
+
+  function buildClassGrid() {
+    const grid = document.getElementById('class-grid');
+    grid.innerHTML = "";
+    CLASSES.forEach(c => {
+      const card = document.createElement('button');
+      card.className = "avatar-card";
+      card.innerHTML = `<span class="avatar-icon">${c.icon}</span><span class="avatar-name">${c.name}</span>`;
+      card.onclick = () => selectClass(c);
+      grid.appendChild(card);
+    });
+  }
+
+  function selectRace(race) {
+    tempRace = race;
+    document.getElementById('race-screen').style.display = "none";
+    document.getElementById('char-screen').style.display = "block";
+    document.getElementById('char-name').value = player.name || "";
+    document.getElementById('btn-char-cancel').style.display = isEditingChar ? "block" : "none";
+  }
+
+  function selectClass(cls) {
+    const name = document.getElementById('char-name').value.trim() || "名無し";
+    player.name = name;
+    player.icon = cls.icon;
+    player.className = cls.name;
+    player.race = (tempRace && tempRace.id) || player.race || "human";
+    player.raceIcon = (tempRace && tempRace.icon) || player.raceIcon || "🧑";
+    player.raceName = (tempRace && tempRace.name) || player.raceName || "人間";
+    localStorage.setItem('quizChar', JSON.stringify(player));
+    isEditingChar = false;
+    loadCharacter();
+  }
+
+  function openCharEdit() {
+    isEditingChar = true;
+    document.getElementById('mode-screen').style.display = "none";
+    document.getElementById('race-screen').style.display = "block";
+    document.getElementById('btn-race-cancel').style.display = "block";
+  }
+
+  function cancelCharEdit() {
+    isEditingChar = false;
+    document.getElementById('race-screen').style.display = "none";
+    document.getElementById('char-screen').style.display = "none";
+    showModes();
+  }
+
+  function loadCharacter() {
+    const saved = localStorage.getItem('quizChar');
+    if (saved) {
+      let parsed = JSON.parse(saved);
+      parsed.skills = parsed.skills || { eliminate: 0, dropN: 0, dropR: 0, dropSR: 0, logCap: 0 };
+      parsed.skills.logCap = parsed.skills.logCap || 0;
+      parsed.drops = parsed.drops || {};
+      parsed.equippedItem = parsed.equippedItem || null;
+      parsed.history = parsed.history || [];
+      parsed.qStats = parsed.qStats || {};
+      parsed.coins = parsed.coins || 0;
+      parsed.totalAnswered = parsed.totalAnswered || 0;
+      parsed.totalCorrect = parsed.totalCorrect || 0;
+      parsed.bestCombo = parsed.bestCombo || 0;
+      parsed.gamesPlayed = parsed.gamesPlayed || 0;
+      parsed.race = parsed.race || "human";
+      parsed.raceIcon = parsed.raceIcon || "🧑";
+      parsed.raceName = parsed.raceName || "人間";
+      parsed.hasLegendaryItem = parsed.hasLegendaryItem || false;
+      player = Object.assign(player, parsed);
+      updatePlayerUI();
+      document.getElementById('race-screen').style.display = "none";
+      document.getElementById('char-screen').style.display = "none";
+      showModes();
+    } else {
+      document.getElementById('mode-screen').style.display = "none";
+      document.getElementById('char-screen').style.display = "none";
+      document.getElementById('race-screen').style.display = "block";
+      document.getElementById('btn-race-cancel').style.display = "none";
+    }
+  }
+
+  function getNextExp(lv) { return lv * 20; }
+
+  // スキルレベルに応じたドロップ率(%)を計算
+  function getDropRatePercent(type, level) {
+    if (type === 'dropN') return 3 + level * 1;
+    if (type === 'dropR') return 0.5 + level * 0.2;
+    if (type === 'dropSR') return 0.01 + level * 0.1;
+    return 0;
+  }
+  function formatRate(type, v) {
+    return type === 'dropN' ? v.toFixed(0) : v.toFixed(2);
+  }
+  function getSP() { return (player.lv - 1) - (player.skills.eliminate * 10 + player.skills.dropN + player.skills.dropR + player.skills.dropSR + player.skills.logCap); }
+  function getHistoryCap() { return 30 + (player.skills.logCap || 0) * 5; } // 初期30件、SPで5件ずつ最大200件まで拡張
+
+  function updatePlayerUI() {
+    document.getElementById('disp-name').innerText = player.name || "名無し"; document.getElementById('disp-icon').innerText = `${player.raceIcon || ''}${player.icon}`;
+    document.getElementById('disp-lv').innerText = player.lv; document.getElementById('disp-kills').innerText = player.totalKills;
+    document.getElementById('disp-exp').innerText = player.exp; document.getElementById('disp-next').innerText = getNextExp(player.lv);
+    document.getElementById('disp-exp-bar').style.width = Math.min(100, (player.exp / getNextExp(player.lv)) * 100) + "%";
+    document.getElementById('disp-coins').innerText = player.coins;
+    
+    let eq = player.equippedItem ? `${ITEMS[player.equippedItem].icon} ${ITEMS[player.equippedItem].name}` : "なし";
+    document.getElementById('disp-equip').innerText = `装備: ${eq}`;
+
+    // 称号と次の称号までの討伐数
+    let currentTitle = TITLES[0].title; let nextTitleInfo = null;
+    for (let i = 0; i < TITLES.length; i++) {
+      if (player.totalKills >= TITLES[i].kills) currentTitle = TITLES[i].title;
+      else { nextTitleInfo = TITLES[i]; break; }
+    }
+    document.getElementById('disp-title').innerText = currentTitle;
+    const nextTitleEl = document.getElementById('disp-next-title');
+    if (nextTitleInfo) {
+      const remain = nextTitleInfo.kills - player.totalKills;
+      nextTitleEl.innerText = `次の称号「${nextTitleInfo.title}」まであと${remain}体`;
+    } else {
+      nextTitleEl.innerText = `全ての称号を解放済み！`;
+    }
+  }
+  function hideAllScreens() { ['maker-screen','race-screen','char-screen','mode-screen','game-screen','result-screen','review-screen','tree-screen','global-history-screen','shop-screen','status-screen'].forEach(id => document.getElementById(id).style.display = "none"); }
+
+  let dungeonOpen = false; // ダンジョンタブの開閉状態
+
+  function toggleDungeonTab() {
+    dungeonOpen = !dungeonOpen;
+    renderModeScreen();
+  }
+
+  function showModes() {
+    hideAllScreens(); document.getElementById('mode-screen').style.display = "block"; updatePlayerUI();
+    renderModeScreen();
+  }
+
+  function renderModeScreen() {
+    const dungeonIds = ["kinder", "beginner", "intermediate", "advanced", "super", "hell"];
+    let clears = JSON.parse(localStorage.getItem('quizClears') || '[]');
+    let allBasicCleared = ["kinder", "beginner", "intermediate", "advanced", "super"].every(id => clears.includes(id));
+
+    // --- ダンジョンタブ(トグルボタン) ---
+    const dungeonTabWrap = document.getElementById('dungeon-tab-wrap');
+    const dungeonClearedCount = ["kinder", "beginner", "intermediate", "advanced", "super"].filter(id => clears.includes(id)).length;
+    dungeonTabWrap.innerHTML = "";
+    const tabBtn = document.createElement('button');
+    tabBtn.className = "dungeon-tab-btn";
+    tabBtn.innerHTML = `
+      <span class="dungeon-tab-icon">🏰</span>
+      <span class="dungeon-tab-text">
+        <span class="dungeon-tab-title">ダンジョンに挑む</span>
+        <span class="dungeon-tab-sub">幼稚園児 〜 超級　(クリア済 ${dungeonClearedCount} / 5)</span>
+      </span>
+      <span class="dungeon-tab-arrow">${dungeonOpen ? "▲" : "▼"}</span>
+    `;
+    tabBtn.onclick = toggleDungeonTab;
+    dungeonTabWrap.appendChild(tabBtn);
+
+    // --- ダンジョン内モード一覧 ---
+    const dungeonList = document.getElementById('dungeon-mode-list');
+    dungeonList.innerHTML = "";
+    dungeonList.style.display = dungeonOpen ? "flex" : "none";
+
+    GAME_MODES.filter(m => dungeonIds.includes(m.id)).forEach(mode => {
+      if (mode.id === "hell" && !allBasicCleared) return;
+      dungeonList.appendChild(buildModeButton(mode, clears));
+    });
+
+    // --- 特殊モード一覧(常時表示) ---
+    const specialList = document.getElementById('special-mode-list');
+    specialList.innerHTML = "";
+    GAME_MODES.filter(m => !dungeonIds.includes(m.id)).forEach(mode => {
+      specialList.appendChild(buildModeButton(mode, clears));
+    });
+  }
+
+  function buildModeButton(mode, clears) {
+    // モード名から絵文字と本文を分離（先頭の絵文字をmode-emojiに、それ以外をmode-nameに）
+    const nameMatch = mode.name.match(/^([\p{Extended_Pictographic}\uFE0F\u200D]+)?(.*)$/u);
+    const emoji = (nameMatch && nameMatch[1]) || "◇";
+    const label = (nameMatch && nameMatch[2]) || mode.name;
+    const basicIds = ["kinder", "beginner", "intermediate", "advanced", "super"];
+
+    let categoryClass = "mode-basic";
+    let meta = "";
+    if (mode.id === "hell") { categoryClass = "mode-hell"; meta = `${mode.count}体 / LIFE ${mode.lives}`; }
+    else if (mode.id === "weakness") { categoryClass = "mode-weakness"; meta = "正答率50%以下のみ"; }
+    else if (mode.id === "infinite") {
+      categoryClass = "mode-endless";
+      const bestScore = parseInt(localStorage.getItem('quizBestScore_infinite') || '0');
+      meta = bestScore > 0 ? `LIFE ${mode.lives} / 🏆 BEST ${bestScore}` : `エンドレス / LIFE ${mode.lives}`;
+    }
+    else if (mode.id === "training") { categoryClass = "mode-endless"; meta = "無制限練習"; }
+    else if (basicIds.includes(mode.id)) { meta = `${mode.count}体 / LIFE ${mode.lives}`; }
+
+    const cleared = clears.includes(mode.id) && mode.count !== 9999;
+
+    const btn = document.createElement('button');
+    btn.className = `mode-btn ${categoryClass}${cleared ? " cleared" : ""}`;
+    btn.innerHTML = `
+      <span class="mode-emoji">${emoji}</span>
+      <span class="mode-name">${label}</span>
+      <span class="mode-meta">${meta}</span>
+    `;
+    btn.onclick = () => startGame(mode);
+    return btn;
+  }
+
+  function showShopScreen() {
+    hideAllScreens(); document.getElementById('shop-screen').style.display = "block";
+    document.getElementById('shop-coins').innerText = player.coins;
+    document.getElementById('shop-result').innerHTML = "";
+    
+    // 未所持数の表示（アイテム名・効果は非表示のまま）
+    ['n', 'r'].forEach(rarity => {
+      const poolKeys = Object.keys(ITEMS).filter(k => ITEMS[k].rarity === rarity);
+      const unownedCount = poolKeys.filter(k => !(player.drops[k] > 0)).length;
+      document.getElementById(`shop-unowned-${rarity}`).innerText = `🔓 未所持: ${unownedCount} / ${poolKeys.length} 種（未所持アイテムが優先的に排出されます）`;
+    });
+  }
+
+  function buyGacha(rarity, cost) {
+    initAudio();
+    if (player.coins < cost) {
+      document.getElementById('shop-result').innerHTML = "<span style='color:#e74c3c'>コインが足りません！</span>"; return;
+    }
+    player.coins -= cost;
+    document.getElementById('shop-coins').innerText = player.coins;
+    
+    // 未所持のアイテムを優先的に排出（すべて所持済みの場合のみ重複あり）
+    let pool = Object.keys(ITEMS).filter(k => ITEMS[k].rarity === rarity && !(player.drops[k] > 0));
+    if (pool.length === 0) pool = Object.keys(ITEMS).filter(k => ITEMS[k].rarity === rarity);
+    const dropKey = pool[Math.floor(Math.random() * pool.length)];
+    player.drops[dropKey] = (player.drops[dropKey] || 0) + 1;
+    playSound('drop');
+    
+    let rClass = rarity === 'r' ? 'rarity-r' : 'rarity-n';
+    let rStr = rarity === 'r' ? 'レア' : '通常';
+    document.getElementById('shop-result').innerHTML = `<span class="${rClass}">🎉 ${ITEMS[dropKey].icon} [${ITEMS[dropKey].name}] (${rStr}) を獲得！</span>`;
+    
+    localStorage.setItem('quizChar', JSON.stringify(player));
+
+    // 未所持数の表示を更新
+    ['n', 'r'].forEach(r => {
+      const poolKeys = Object.keys(ITEMS).filter(k => ITEMS[k].rarity === r);
+      const unownedCount = poolKeys.filter(k => !(player.drops[k] > 0)).length;
+      document.getElementById(`shop-unowned-${r}`).innerText = `🔓 未所持: ${unownedCount} / ${poolKeys.length} 種（未所持アイテムが優先的に排出されます）`;
+    });
+  }
+
+  function showGlobalHistory() {
+    hideAllScreens(); document.getElementById('global-history-screen').style.display = "block";
+    document.getElementById('history-cap-label').innerText = `(${player.history.length} / ${getHistoryCap()}件)`;
+    const list = document.getElementById('global-history-list'); list.innerHTML = "";
+    if (player.history.length === 0) { list.innerHTML = "<span style='color:var(--text-fade)'>まだ記録がありません．</span>"; return; }
+    player.history.forEach(h => {
+      const stats = player.qStats && player.qStats[h.q];
+      let accHtml = "";
+      if (stats && stats.a > 0) {
+        const acc = Math.round((stats.c / stats.a) * 100);
+        const accColor = acc >= 70 ? 'var(--accent-lime)' : acc >= 40 ? 'var(--accent-amber)' : 'var(--accent-red)';
+        accHtml = `<div style="font-family:var(--font-mono); font-size:11px; color:${accColor}; margin-top:4px;">この問題の正答率: ${acc}% (${stats.c}/${stats.a}回)</div>`;
+      }
+      list.innerHTML += `<div style="background:var(--bg-panel-2); padding:11px 12px; margin-bottom:8px; border-radius:3px; border:1px solid var(--line); border-left: 3px solid ${h.ok ? 'var(--accent-lime)' : 'var(--accent-red)'};">
+        <div style="font-family:var(--font-mono); font-size:10px; color:var(--text-fade); margin-bottom:5px; letter-spacing:0.05em;">${h.date} · ${h.ok ? '✓ CORRECT' : '✗ INCORRECT'}</div>
+        <div style="font-weight:700; margin-bottom:6px; line-height:1.5;">Q. ${h.q}</div>
+        <div style="color:var(--accent-amber); margin-bottom:3px; font-size:12px;">選択: ${h.selected || 'なし'}</div>
+        <div style="color:var(--accent-lime); font-size:12px;">正解: ${h.correct}</div>
+        ${accHtml}
+      </div>`;
+    });
+  }
+
+  function showStatusScreen() {
+    hideAllScreens(); document.getElementById('status-screen').style.display = "block";
+
+    const answered = player.totalAnswered || 0;
+    const correct = player.totalCorrect || 0;
+    const accuracy = answered > 0 ? ((correct / answered) * 100).toFixed(1) : "0.0";
+
+    // 称号の計算
+    let currentTitle = TITLES[0].title;
+    for (let i = 0; i < TITLES.length; i++) { if (player.totalKills >= TITLES[i].kills) currentTitle = TITLES[i].title; }
+
+    // 図鑑コンプリート率
+    const allKeys = Object.keys(ITEMS);
+    const ownedCount = allKeys.filter(k => (player.drops[k] || 0) > 0).length;
+    const collectionRate = Math.round((ownedCount / allKeys.length) * 100);
+
+    // クリア済みモード
+    const clears = JSON.parse(localStorage.getItem('quizClears') || '[]');
+    const clearBadges = GAME_MODES.filter(m => m.count !== 9999).map(m => {
+      const isCleared = clears.includes(m.id);
+      if (m.id === 'hell' && !isCleared) return null;
+      return `<span style="display:inline-block; padding:4px 9px; margin:3px 3px 0 0; border-radius:2px; font-size:11px; font-family:var(--font-mono); letter-spacing:0.05em; background:${isCleared ? 'rgba(132,204,22,0.15)' : 'var(--bg-void)'}; color:${isCleared ? 'var(--accent-lime)' : 'var(--text-fade)'}; border:1px solid ${isCleared ? 'var(--accent-lime)' : 'var(--line)'};">${isCleared ? '★' : '◇'} ${m.name}</span>`;
+    }).filter(Boolean).join("");
+
+    const accColor = accuracy >= 70 ? 'var(--accent-lime)' : accuracy >= 40 ? 'var(--accent-amber)' : 'var(--accent-red)';
+
+    const legendaryBanner = player.hasLegendaryItem ? `
+      <div class="stat-card" style="border-color:#f1c40f; background:linear-gradient(135deg, rgba(241,196,15,0.12) 0%, transparent 70%);">
+        <div class="lab-label" style="color:#f1c40f;">??? Unknown Power</div>
+        <div style="font-family:var(--font-display); font-size:14px; font-weight:700; color:#fff; text-shadow:0 0 10px #f1c40f; margin-top:4px;">👑 ${LEGENDARY_ITEM.name}</div>
+        <div style="font-size:11px; color:var(--text-dim); margin-top:6px; line-height:1.6;">${LEGENDARY_ITEM.desc}</div>
+      </div>` : "";
+
+    document.getElementById('status-content').innerHTML = `
+      <div class="stat-card">
+        <div class="lab-label">Identity</div>
+        <div style="font-size:20px; font-weight:700; letter-spacing:0.02em;">${player.raceIcon || ''}${player.icon} ${player.name || '名無し'}</div>
+        <div style="font-family:var(--font-mono); font-size:10px; color:var(--text-fade); letter-spacing:0.1em; margin-top:2px;">${player.raceName || ''} / ${player.className || ''}</div>
+        <div style="display:inline-block; margin-top:8px; font-family:var(--font-display); font-size:15px; font-weight:700; color:var(--accent-amber); letter-spacing:0.1em; padding:4px 14px; background:linear-gradient(180deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.04) 100%); border:1px solid var(--accent-amber); border-radius:3px; text-shadow:0 0 10px rgba(245,158,11,0.7); box-shadow:0 0 16px -4px rgba(245,158,11,0.6);">◆ ${currentTitle} ◆</div>
+        <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-dim); letter-spacing:0.1em; margin-top:8px;">LV ${player.lv}</div>
+      </div>
+
+      ${legendaryBanner}
+
+      <div class="stat-card">
+        <div class="lab-label">Combat Log</div>
+        <div style="font-family:var(--font-mono); font-size:13px; line-height:1.9;">
+          KILLS &nbsp;&nbsp;&nbsp;<strong>${player.totalKills}</strong><br>
+          ANSWERED &nbsp;<strong>${answered}</strong><br>
+          CORRECT &nbsp;&nbsp;<strong>${correct}</strong><br>
+          ACCURACY &nbsp;<strong style="color:${accColor};">${accuracy}%</strong><br>
+          BEST CHAIN <strong>${player.bestCombo || 0}</strong><br>
+          RUNS &nbsp;&nbsp;&nbsp;&nbsp;<strong>${player.gamesPlayed || 0}</strong>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="lab-label">Inventory</div>
+        <div style="font-family:var(--font-mono); font-size:13px; line-height:1.9;">
+          CATALOG &nbsp;<strong>${collectionRate}%</strong> <span style="color:var(--text-fade);">(${ownedCount} / ${allKeys.length})</span><br>
+          COIN &nbsp;&nbsp;&nbsp;&nbsp;<strong style="color:var(--accent-amber);">💰 ${player.coins}</strong>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="lab-label">Cleared Modes</div>
+        <div style="margin-top:6px;">${clearBadges || "<span style='color:var(--text-fade); font-size:12px;'>まだクリアしたモードがありません</span>"}</div>
+      </div>
+    `;
+  }
+
+  function showTreeScreen() {
+    hideAllScreens(); document.getElementById('tree-screen').style.display = "block";
+    document.getElementById('disp-sp').innerText = getSP();
+    document.getElementById('tree-coins').innerText = player.coins;
+
+    document.getElementById('skill-eliminate').innerText = player.skills.eliminate;
+    document.getElementById('skill-dropN').innerText = player.skills.dropN;
+    document.getElementById('skill-dropR').innerText = player.skills.dropR;
+    document.getElementById('skill-dropSR').innerText = player.skills.dropSR;
+    document.getElementById('skill-logCap').innerText = player.skills.logCap;
+
+    const btnElim = document.getElementById('btn-up-elim');
+    if (player.skills.eliminate >= 1) { btnElim.innerText = "習得済み"; btnElim.disabled = true; }
+    else { btnElim.innerText = "SPを10消費して習得"; btnElim.disabled = getSP() < 10; }
+    
+    ['dropN', 'dropR', 'dropSR'].forEach(t => {
+      const btn = document.getElementById(`btn-up-${t}`);
+      const max = t === 'dropSR' ? 5 : 10;
+      const curLv = player.skills[t];
+      const curRate = getDropRatePercent(t, curLv);
+      const effectEl = document.getElementById(`effect-${t}`);
+      if (curLv >= max) {
+        effectEl.innerText = `現在のドロップ率: ${formatRate(t, curRate)}%（最大Lv到達）`;
+        btn.innerText = "最大Lv到達"; btn.disabled = true;
+      } else {
+        const nextRate = getDropRatePercent(t, curLv + 1);
+        effectEl.innerText = `現在のドロップ率: ${formatRate(t, curRate)}% → 次Lv: ${formatRate(t, nextRate)}%`;
+        btn.innerText = "SPを1消費して強化"; btn.disabled = false;
+      }
+    });
+
+    // 解答ログ拡張スキルの表示
+    {
+      const btnLog = document.getElementById('btn-up-logCap');
+      const curLv = player.skills.logCap;
+      const curCap = getHistoryCap();
+      const effectEl = document.getElementById('effect-logCap');
+      if (curLv >= 34) {
+        effectEl.innerText = `現在のログ保存件数: ${curCap}件（最大Lv到達）`;
+        btnLog.innerText = "最大Lv到達"; btnLog.disabled = true;
+      } else {
+        const nextCap = 30 + (curLv + 1) * 5;
+        effectEl.innerText = `現在のログ保存件数: ${curCap}件 → 次Lv: ${nextCap}件`;
+        btnLog.innerText = "SPを1消費して強化"; btnLog.disabled = false;
+      }
+    }
+
+    // 図鑑コンプリート率（表示順序: 通常 → レア → 超激レア）
+    const rarityOrder = { n: 0, r: 1, sr: 2 };
+    const allKeys = Object.keys(ITEMS).sort((a, b) => rarityOrder[ITEMS[a].rarity] - rarityOrder[ITEMS[b].rarity]);
+    const ownedKeys = allKeys.filter(k => (player.drops[k] || 0) > 0);
+    const rate = Math.round((ownedKeys.length / allKeys.length) * 100);
+    document.getElementById('collection-rate').innerText = rate;
+
+    const colList = document.getElementById('collection-list'); colList.innerHTML = "";
+    allKeys.forEach(k => {
+      const item = ITEMS[k]; const count = player.drops[k] || 0; const isEquipped = player.equippedItem === k;
+      const isOwned = count > 0;
+
+      let tagClass = item.rarity === 'sr' ? 'tag-sr' : item.rarity === 'r' ? 'tag-r' : 'tag-n';
+      let rStr = item.rarity === 'sr' ? '超激レア' : item.rarity === 'r' ? 'レア' : '通常';
+
+      if (!isOwned) {
+        colList.innerHTML += `
+          <div class="collection-item" style="opacity:0.5; background:var(--bg-void);">
+            <div class="collection-info">
+              <span class="rarity-tag ${tagClass}">${rStr}</span><br>
+              <strong style="font-size:14px; color:var(--text-fade);">🔒 ？？？</strong><br>
+              <span style="font-size:11px; color:var(--text-fade);">未入手のアイテム</span>
+            </div>
+          </div>`;
+        return;
+      }
+
+      let btnHtml = isEquipped ? `<button class="btn-unequip" onclick="equipItem(null)">外す</button>` : `<button class="btn-equip" onclick="equipItem('${k}')">装備する</button>`;
+      let sellHtml = count > 1 ? `<button class="btn-sell" onclick="sellItem('${k}')">売却(+${item.sell}C)</button>` : '';
+
+      colList.innerHTML += `
+        <div class="collection-item" style="${isEquipped ? 'border-color:var(--accent-amber); box-shadow:0 0 0 1px rgba(245,158,11,0.2), 0 0 12px -4px rgba(245,158,11,0.4);' : ''}">
+          <div class="collection-info">
+            <span class="rarity-tag ${tagClass}">${rStr}</span><br>
+            <strong style="font-size:14px;">${item.icon} ${item.name}</strong> <span style="font-family:var(--font-mono); font-size:10px; color:var(--text-fade); letter-spacing:0.05em;">×${count}</span><br>
+            <span style="font-size:11px; color:var(--text-dim); line-height:1.5;">${item.desc}</span>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end;">
+            ${btnHtml}
+            ${sellHtml}
+          </div>
+        </div>`;
+    });
+  }
+
+  function equipItem(key) { player.equippedItem = key; localStorage.setItem('quizChar', JSON.stringify(player)); showTreeScreen(); }
+
+  function sellItem(key) {
+    if (player.drops[key] > 1) {
+      player.drops[key]--;
+      player.coins += ITEMS[key].sell;
+      localStorage.setItem('quizChar', JSON.stringify(player));
+      showTreeScreen();
+    }
+  }
+
+  function upgradeSkill(type) {
+    initAudio();
+    if (type === 'eliminate' && player.skills.eliminate >= 1) return;
+    if (type === 'dropN' && player.skills.dropN >= 10) return;
+    if (type === 'dropR' && player.skills.dropR >= 10) return;
+    if (type === 'dropSR' && player.skills.dropSR >= 5) return;
+    if (type === 'logCap' && player.skills.logCap >= 34) return;
+    const cost = type === 'eliminate' ? 10 : 1;
+    if (getSP() >= cost) {
+      player.skills[type]++;
+      playSound('levelup');
+      localStorage.setItem('quizChar', JSON.stringify(player));
+      showTreeScreen();
+    }
+    else { alert(`SPが足りません．(必要SP: ${cost})`); }
+  }
+
+  function startGame(mode) {
+    initAudio();
+    
+    // 苦手問題モードのプール生成処理
+    if (mode.id === "weakness") {
+      const allQ = [...normalPool, ...hellPool];
+      currentPool = allQ.filter(q => {
+        const stats = player.qStats && player.qStats[q.q];
+        if (!stats || stats.a === 0) return false;
+        return (stats.c / stats.a) <= 0.5;
+      });
+      if (currentPool.length === 0) {
+        return alert("正答率50%以下の苦手問題がまだ蓄積されていません．（他のモードをプレイしてください）");
+      }
+    } else {
+      currentPool = mode.id === "hell" ? hellPool : normalPool;
+    }
+
+    if (currentPool.length === 0) return alert("問題がありません．");
+    
+    currentModeObj = mode; currentLives = mode.lives;
+    player.gamesPlayed = (player.gamesPlayed || 0) + 1;
+    
+    if (player.equippedItem === 'serum') currentLives = Math.max(1, currentLives - 1);
+    if (player.equippedItem === 'petri' && mode.id === 'kinder') currentLives += 1;
+    if (player.equippedItem === 'pcr') currentLives += 1;
+
+    // スコアと状態の完全リセット
+    qCount = 0; killedCount = 0; earnedExp = 0; earnedKills = 0; combo = 0; maxCombo = 0; totalScore = 0;
+    lastQuestionText = null;
+    poisonTurns = 0;
+    isEliminateUsed = false; isItemEliminateUsed = false; defeatedMonsters = [];
+    document.getElementById('live-score').innerText = "0";
+
+    // 無限回路編のベストスコア表示
+    const bestLine = document.getElementById('best-score-line');
+    if (mode.id === 'infinite') {
+      currentBestScore = parseInt(localStorage.getItem('quizBestScore_infinite') || '0');
+      document.getElementById('live-best-score').innerText = currentBestScore;
+      bestLine.style.display = "block";
+    } else {
+      currentBestScore = 0;
+      bestLine.style.display = "none";
+    }
+    
+    enemyQueue = Array.from({length: mode.count === 9999 ? 50 : mode.count}, () => {
+      const pool = mode.id === 'hell' ? hellIcons : icons;
+      return pool[Math.floor(Math.random() * pool.length)];
+    });
+    hideAllScreens(); document.getElementById('game-screen').style.display = "block";
+    document.getElementById('mode-name').innerText = mode.name; document.getElementById('player-sprite').innerText = player.icon;
+    
+    // スプライトの初期化
+    const pSprite = document.getElementById('player-sprite');
+    const mSprite = document.getElementById('current-monster');
+    pSprite.style.animation = "none"; mSprite.style.animation = "none";
+    pSprite.style.filter = "drop-shadow(0 0 5px rgba(255,255,255,0.3))"; 
+    mSprite.style.filter = "drop-shadow(0 0 5px rgba(255,0,0,0.4))";
+
+    // ダンジョンごとのテーマ背景に切り替え(苦手問題/無限回路編/訓練モードは通常背景のまま)
+    const battleArea = document.querySelector('.battle-area');
+    battleArea.className = 'battle-area';
+    const themedModes = ['kinder', 'beginner', 'intermediate', 'advanced', 'super', 'hell'];
+    if (themedModes.includes(mode.id)) battleArea.classList.add(`theme-${mode.id}`);
+
+    updateLifeUI(); updateComboUI(); nextQuiz();
+  }
+
+  function updateLifeUI() { 
+    if (currentLives > 10) document.getElementById('live-life').innerText = `❤️ x ${currentLives}`;
+    else document.getElementById('live-life').innerText = "❤️ ".repeat(Math.max(0, currentLives)); 
+  }
+
+  let lastQuestionText = null; // 直前に出題した問題文(連続出題回避用)
+
+  // マッコンキー寒天培地装備時、正答率60%以下の問題をほんの少しだけ選ばれやすくする(重み付け抽選)
+  function pickWeightedByWeakness(pool) {
+    const weights = pool.map(q => {
+      const stats = player.qStats && player.qStats[q.q];
+      if (stats && stats.a > 0 && (stats.c / stats.a) <= 0.6) return 1.4; // ほんの少しだけ重みを上げる
+      return 1.0;
+    });
+    const total = weights.reduce((a, b) => a + b, 0);
+    let r = Math.random() * total;
+    for (let i = 0; i < pool.length; i++) {
+      r -= weights[i];
+      if (r <= 0) return pool[i];
+    }
+    return pool[pool.length - 1];
+  }
+
+  function pickNextQuestion(pool) {
+    if (pool.length <= 1) return pool[Math.floor(Math.random() * pool.length)];
+    const useWeighting = player.equippedItem === 'agar';
+    let q, attempts = 0;
+    do {
+      q = useWeighting ? pickWeightedByWeakness(pool) : pool[Math.floor(Math.random() * pool.length)];
+      attempts++;
+    } while (q.q === lastQuestionText && attempts < 20); // どうしても回避できない場合は諦めて許容
+    return q;
+  }
+
+  function nextQuiz(keepMonster = false) {
+    document.getElementById('message').innerText = ""; document.getElementById('btn-submit').disabled = false; selectedAnswers.clear();
+    qCount++; 
+    
+    if (!keepMonster) {
+      // 敵を倒して次の敵と対峙する場合のみ、敵の表示を切り替える
+      const fallbackPool = currentModeObj.id === 'hell' ? hellIcons : icons;
+      const nextEnemy = enemyQueue.shift() || fallbackPool[Math.floor(Math.random() * fallbackPool.length)];
+      const mSprite = document.getElementById('current-monster');
+      mSprite.innerText = nextEnemy;
+      playMonsterEnter();
+    }
+    // 不正解時(keepMonster=true)は同じ敵と再戦するため、モンスター表示は変えない
+
+    // 討伐数は全モードで常に表示
+    if (currentModeObj.count === 9999) {
+      document.getElementById('progress-text').innerText = `討伐数: ${killedCount}匹`;
+    } else {
+      document.getElementById('progress-text').innerText = `討伐目標: ${killedCount} / ${currentModeObj.count} 匹`;
+    }
+    
+    // 現在のプールから出題（直前の問題とは異なるものを優先）
+    currentQData = pickNextQuestion(currentPool);
+    lastQuestionText = currentQData.q;
+    document.getElementById('quiz-question').innerText = currentQData.q;
+
+    // 回答数(必要な選択数)のヒント表示。超級・地獄級では常に非表示。また、毒状態の間も非表示になる
+    const countBadge = document.getElementById('answer-count-badge');
+    const poisonHiding = poisonTurns > 0;
+    const answerCountHidden = HIDE_ANSWER_COUNT_MODES.includes(currentModeObj.id) || poisonHiding;
+    if (poisonHiding) poisonTurns--;
+
+    if (answerCountHidden) {
+      countBadge.style.display = "none";
+    } else {
+      countBadge.style.display = "block";
+      countBadge.innerText = `🎯 SELECT × ${currentQData.ans.length}`;
+    }
+
+    // 毒状態インジケーター
+    const poisonBadge = document.getElementById('poison-badge');
+    if (poisonHiding) { poisonBadge.style.display = "inline"; poisonBadge.innerText = `🐍 猛毒中 (残り${poisonTurns + 1}問)`; }
+    else { poisonBadge.style.display = "none"; }
+    
+    let opts = currentQData.opts.map((text, idx) => ({ text: text, originalIdx: idx }));
+    opts.sort(() => Math.random() - 0.5);
+
+    // 解答が1つだけの問題は、回答数が見えている場合に限り単一選択(ラジオ的な挙動)にする
+    const isSingleAnswerMode = currentQData.ans.length === 1 && !answerCountHidden;
+
+    const optDiv = document.getElementById('quiz-options'); optDiv.innerHTML = "";
+    const optLabels = ["A", "B", "C", "D", "E", "F", "G", "H"];
+    opts.forEach((o, i) => {
+      const btn = document.createElement('button'); btn.className = "btn opt-btn"; btn.innerText = o.text;
+      btn.dataset.idx = o.originalIdx;
+      btn.dataset.label = optLabels[i] || "?";
+      btn.onclick = () => {
+        if (isSingleAnswerMode) {
+          // 他の選択を解除してこれだけを選択
+          document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('opt-selected'));
+          selectedAnswers.clear();
+          selectedAnswers.add(o.originalIdx);
+          btn.classList.add('opt-selected');
+        } else {
+          if(selectedAnswers.has(o.originalIdx)) { selectedAnswers.delete(o.originalIdx); btn.classList.remove('opt-selected'); }
+          else { selectedAnswers.add(o.originalIdx); btn.classList.add('opt-selected'); }
+        }
+      };
+      optDiv.appendChild(btn);
+    });
+
+    const elimBtn = document.getElementById('btn-skill-eliminate');
+    if (player.skills.eliminate >= 1 && !isEliminateUsed) elimBtn.style.display = "block";
+    else elimBtn.style.display = "none";
+
+    // アイテム(消毒用エタノール)による選択肢消去は、自分のタイミングでボタンを押して発動する
+    const itemElimBtn = document.getElementById('btn-item-eliminate');
+    if (player.equippedItem === 'alcohol' && !isItemEliminateUsed) {
+      itemElimBtn.style.display = "block";
+      itemElimBtn.innerText = "🧴 選択肢を1つ消す (残り1回)";
+    } else {
+      itemElimBtn.style.display = "none";
+    }
+
+    // 伝説アイテム所持時: 常時、間違い選択肢が1つになるまで自動消去する
+    if (player.hasLegendaryItem) {
+      let wrongBtns = Array.from(document.querySelectorAll('.opt-btn')).filter(b => !currentQData.ans.includes(parseInt(b.dataset.idx)));
+      while (wrongBtns.length > 1) {
+        const i = Math.floor(Math.random() * wrongBtns.length);
+        const target = wrongBtns[i];
+        target.disabled = true; target.style.opacity = "0.25"; target.style.pointerEvents = "none";
+        wrongBtns.splice(i, 1);
+      }
+    }
+  }
+
+  function useEliminateSkill(isAuto = false, isItem = false) {
+    if (!isAuto) {
+      if (isItem && isItemEliminateUsed) return;
+      if (!isItem && isEliminateUsed) return;
+    }
+    const btns = Array.from(document.querySelectorAll('.opt-btn:not(:disabled)'));
+    const wrongBtns = btns.filter(b => !currentQData.ans.includes(parseInt(b.dataset.idx)));
+    if (wrongBtns.length > 0) {
+      const target = wrongBtns[Math.floor(Math.random() * wrongBtns.length)];
+      target.disabled = true; target.style.opacity = "0.3";
+      if(selectedAnswers.has(parseInt(target.dataset.idx))) {
+        selectedAnswers.delete(parseInt(target.dataset.idx)); target.classList.remove('opt-selected');
+      }
+      if (!isAuto) {
+        if (isItem) {
+          isItemEliminateUsed = true;
+          document.getElementById('btn-item-eliminate').style.display = "none";
+        } else {
+          isEliminateUsed = true;
+          document.getElementById('btn-skill-eliminate').style.display = "none";
+        }
+      }
+    }
+  }
+
+  function processDropCheck(msg) {
+    let rateN = 0.03 + (player.skills.dropN * 0.01);
+    let rateR = 0.005 + (player.skills.dropR * 0.002);
+    let rateSR = 0.0001 + (player.skills.dropSR * 0.001);
+
+    if (player.equippedItem === 'pipette') { rateN += 0.05; }
+
+    let roll = Math.random();
+    let dropKey = null;
+
+    if (roll < rateSR) {
+      const pool = Object.keys(ITEMS).filter(k => ITEMS[k].rarity === 'sr');
+      dropKey = pool[Math.floor(Math.random() * pool.length)];
+    } else if (roll < rateSR + rateR) {
+      const pool = Object.keys(ITEMS).filter(k => ITEMS[k].rarity === 'r');
+      dropKey = pool[Math.floor(Math.random() * pool.length)];
+    } else if (roll < rateSR + rateR + rateN) {
+      const pool = Object.keys(ITEMS).filter(k => ITEMS[k].rarity === 'n');
+      dropKey = pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    if (dropKey) {
+      player.drops[dropKey] = (player.drops[dropKey] || 0) + 1;
+      let rClass = ITEMS[dropKey].rarity === 'sr' ? 'rarity-sr' : ITEMS[dropKey].rarity === 'r' ? 'rarity-r' : 'rarity-n';
+      let rStr = ITEMS[dropKey].rarity === 'sr' ? '超激レア' : ITEMS[dropKey].rarity === 'r' ? 'レア' : '通常';
+      msg.innerHTML += `<br><span class="drop-text ${rClass}">🎁 ${ITEMS[dropKey].icon} [${ITEMS[dropKey].name}] (${rStr}) を獲得！</span>`;
+      playSound('drop');
+    }
+  }
+
+  // 伝説アイテムの入手判定。通常時は0.000001%、通常アイテムを全種類所持済みなら1%に上昇する。
+  // 図鑑には一切表示せず、入手した瞬間にだけ大々的に知らせる。
+  function checkLegendaryDrop(msg) {
+    if (player.hasLegendaryItem) return; // 既に入手済みなら判定不要
+    const allOwned = Object.keys(ITEMS).every(k => (player.drops[k] || 0) > 0);
+    const rate = allOwned ? 0.001 : 0.00000001; // 全アイテム所持後は0.1%、それ以外は0.000001%
+    if (Math.random() < rate) {
+      player.hasLegendaryItem = true;
+      msg.innerHTML += `<br><span class="drop-text" style="color:#fff; text-shadow:0 0 10px #f1c40f, 0 0 20px #f1c40f;">👑✨ 【${LEGENDARY_ITEM.name}】を手に入れた……！✨👑</span>`;
+      playSound('clear');
+      setTimeout(() => alert(`✨✨✨ 伝説のアイテムを入手しました ✨✨✨\n\n【${LEGENDARY_ITEM.name}】\n\n${LEGENDARY_ITEM.desc}`), 600);
+    }
+  }
+
+  function submitAnswer() {
+    initAudio(); if (selectedAnswers.size === 0) return;
+    document.getElementById('btn-submit').disabled = true; document.getElementById('btn-skill-eliminate').style.display = "none"; document.getElementById('btn-item-eliminate').style.display = "none";
+    
+    const correctSet = new Set(currentQData.ans);
+    let isCorrect = selectedAnswers.size === correctSet.size && [...selectedAnswers].every(x => correctSet.has(x));
+    const msg = document.getElementById('message');
+
+    // 正答率データの記録
+    player.qStats = player.qStats || {};
+    let stat = player.qStats[currentQData.q] || { a: 0, c: 0 };
+    stat.a++;
+    if (isCorrect) stat.c++;
+    player.qStats[currentQData.q] = stat;
+
+    // 累計解答統計の記録
+    player.totalAnswered = (player.totalAnswered || 0) + 1;
+    if (isCorrect) player.totalCorrect = (player.totalCorrect || 0) + 1;
+
+    const selectedTexts = [...selectedAnswers].map(idx => currentQData.opts[idx]).join(", ");
+    const correctTexts = currentQData.ans.map(idx => currentQData.opts[idx]).join(", ");
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    
+    player.history.unshift({ date: dateStr, q: currentQData.q, selected: selectedTexts, correct: correctTexts, ok: isCorrect });
+    if (player.history.length > getHistoryCap()) player.history.pop();
+
+    if (!isCorrect && player.equippedItem === 'ring' && Math.random() < 0.20) {
+      isCorrect = true; player.history[0].ok = true; 
+      msg.innerHTML += "<span style='color:#f1c40f; font-size:12px;'>💍 [偽陽性の指輪] 奇跡的に正解として処理された！</span><br>";
+    }
+
+    if (isCorrect) {
+      playSound('hit'); hitStop(); playAttackFx();
+      
+      resetAnimation('player-sprite', 'playerAttack', '0.3s');
+      setTimeout(() => resetAnimation('current-monster', 'monsterDamage', '0.3s'), 150);
+      
+      combo++; if(combo > maxCombo) maxCombo = combo;
+      if (combo > (player.bestCombo || 0)) player.bestCombo = combo;
+      let multiplier = 1 + (combo * 0.1) + (player.equippedItem === 'gram' ? 0.2 : 0);
+      
+      let expGained = Math.floor(10 * multiplier); let ptsGained = Math.floor(100 * multiplier);
+      
+      if (player.equippedItem === 'centrifuge') expGained = Math.floor(expGained * (1 + Math.random()));
+      else if (player.equippedItem === 'serum') expGained = Math.floor(expGained * 1.5);
+      if (player.equippedItem === 'gloves') expGained = Math.floor(expGained * 1.1);
+      if (player.equippedItem === 'slide') expGained += 1;
+      
+      if (player.equippedItem === 'mask') ptsGained = Math.floor(ptsGained * 1.1);
+      if (player.equippedItem === 'tourniquet' && currentLives === 1) ptsGained = Math.floor(ptsGained * 1.5);
+      if (player.equippedItem === 'edta') ptsGained += 10;
+      
+      if (player.equippedItem === 'pcr') { ptsGained *= 2; expGained *= 2; }
+      if (player.equippedItem === 'incubator' && Math.random() < 0.005) {
+        currentLives++; updateLifeUI();
+        msg.innerHTML += "<span style='color:#2ed573; font-size:12px;'>🌡️ [インキュベーター] ライフが1回復した！</span><br>";
+      }
+
+      // 伝説アイテム所持時: 経験値100倍・討伐数10体分カウント
+      const killWeight = player.hasLegendaryItem ? 10 : 1;
+      if (player.hasLegendaryItem) expGained *= 100;
+
+      totalScore += ptsGained; earnedExp += expGained; earnedKills += killWeight; killedCount += killWeight;
+      defeatedMonsters.push(document.getElementById('current-monster').innerText);
+      
+      runHistory.push({ q: currentQData.q, selected: selectedTexts, correct: correctTexts, ok: true });
+
+      msg.innerHTML += `🎉 討伐！ +${expGained} EXP`; msg.style.color = "#2ed573";
+      
+      processDropCheck(msg);
+      if (player.equippedItem === 'microscope') { for (let i = 0; i < 9; i++) processDropCheck(msg); } // 合計10回判定
+
+      // モンスターからのコインドロップ(1%)
+      if (Math.random() < 0.01) {
+        const coinGain = Math.floor(Math.random() * 41) + 10; // 10〜50コイン
+        player.coins += coinGain;
+        msg.innerHTML += `<br><span class="drop-text" style="color:var(--accent-amber);">💰 ${coinGain}コインを発見！</span>`;
+        playSound('drop');
+      }
+
+      // 伝説アイテムのドロップ判定(通常0.000001%、全アイテム所持後は1%)
+      checkLegendaryDrop(msg);
+
+      document.getElementById('live-score').innerText = totalScore;
+      if (currentModeObj.id === 'infinite' && totalScore > currentBestScore) {
+        document.getElementById('live-best-score').innerText = totalScore;
+      }
+      updateComboUI();
+      
+      setTimeout(() => { 
+        resetAnimation('current-monster', 'monsterDefeat', '0.3s', 'forwards'); // forwardsで消滅状態を維持(次の敵が出るまで元の敵が一瞬戻るのを防ぐ)
+        setTimeout(() => {
+          if (killedCount >= currentModeObj.count) { gameEnd(true); return; }
+          // 敵を倒した後、少し前進してから次の敵が現れる（歩行音つき）
+          resetAnimation('player-sprite', 'playerAdvance', '0.35s');
+          playSound('walk');
+          setTimeout(() => { nextQuiz(); }, 700);
+        }, 300);
+      }, 1000);
+
+    } else {
+      // ダメージ無効化判定(コンタミの神 → 伝説アイテムの順に判定)
+      let damageNegated = false; let negateMsg = "";
+      if (player.equippedItem === 'swab' && Math.random() < 0.05) {
+        damageNegated = true; negateMsg = "🥢 [コンタミの神] 攻撃を完全に防いだ！";
+      }
+      if (!damageNegated && player.hasLegendaryItem && Math.random() < 0.70) {
+        damageNegated = true; negateMsg = "👑 [Ultra Ultimate Super Hyper Kami God] 加護によりライフの消失を防いだ！";
+      }
+
+      if (damageNegated) {
+        msg.innerHTML += `<span style='color:#3498db; font-size:12px;'>${negateMsg}</span><br>`;
+        combo = 0; runHistory.push({ q: currentQData.q, selected: selectedTexts, correct: correctTexts, ok: false });
+        setTimeout(() => nextQuiz(true), 1500); return;
+      }
+
+      playSound('damage');
+      const container = document.getElementById('main-container');
+      container.classList.remove('shake-hard'); void container.offsetWidth; container.classList.add('shake-hard');
+      
+      resetAnimation('current-monster', 'monsterAttack', '0.3s');
+      setTimeout(() => resetAnimation('player-sprite', 'playerDamage', '0.3s'), 150);
+      
+      combo = 0; msg.innerHTML += `❌ 被弾！<br>`; msg.style.color = "#ff4757";
+      currentLives--; runHistory.push({ q: currentQData.q, selected: selectedTexts, correct: correctTexts, ok: false });
+
+      // 正解をうっすらハイライトして見せる(次の問題に切り替わるまでの間だけ)
+      document.querySelectorAll('.opt-btn').forEach(btn => {
+        const idx = parseInt(btn.dataset.idx);
+        if (currentQData.ans.includes(idx)) btn.classList.add('opt-correct-hint');
+        btn.disabled = true;
+      });
+
+      // 30%の確率で毒状態になり、しばらく回答数が分からなくなる(超級・地獄級は元々常時非表示のため対象外)
+      if (!HIDE_ANSWER_COUNT_MODES.includes(currentModeObj.id) && Math.random() < 0.30) {
+        poisonTurns = 2;
+        msg.innerHTML += "<span style='color:#84cc16; font-size:12px;'>🐍 猛毒を受けた！しばらく選択肢の数が分からなくなる...</span><br>";
+      }
+
+      if (currentLives <= 0 && player.equippedItem === 'kimwipe' && Math.random() < 0.10) {
+        currentLives = 1;
+        msg.innerHTML += "<span style='color:#2ed573; font-size:12px;'>🧻 [神聖なるキムワイプ] 涙を拭いて復活！</span><br>";
+      }
+      
+      updateLifeUI();
+      
+      if (currentLives <= 0) {
+        msg.innerHTML += "💀 ライフが尽きた... 討伐失敗"; setTimeout(() => gameEnd(false, 'defeat'), 1500);
+      } else { setTimeout(() => nextQuiz(true), 1500); }
+    }
+    localStorage.setItem('quizChar', JSON.stringify(player));
+  }
+
+  function updateComboUI() {
+    const el = document.getElementById('combo-counter');
+    if (combo < 2) { el.innerText = ""; return; }
+    el.innerText = `${combo} CHAIN!`; el.className = "combo-counter pop";
+    if (combo >= 5) el.classList.add("combo-fire");
+    setTimeout(() => el.classList.remove("pop"), 150);
+  }
+
+  function gameEnd(isClear, reason = null) {
+    hideAllScreens(); document.getElementById('result-screen').style.display = "block";
+    if (isClear) playSound('clear');
+    else if (reason === 'defeat') playSound('defeat');
+    
+    let clears = JSON.parse(localStorage.getItem('quizClears') || '[]');
+    if (isClear && !clears.includes(currentModeObj.id)) { clears.push(currentModeObj.id); localStorage.setItem('quizClears', JSON.stringify(clears)); }
+    
+    player.totalKills += earnedKills; player.exp += earnedExp;
+    while (player.exp >= getNextExp(player.lv)) { player.exp -= getNextExp(player.lv); player.lv++; }
+    
+    // 訓練モードの特別リザルト
+    if (currentModeObj.id === 'training') {
+      document.getElementById('result-title').innerText = `🏆 ${earnedKills}体 討伐！`;
+      document.getElementById('result-title').style.color = "#2ed573";
+      document.getElementById('result-defeated').style.display = "block";
+      document.getElementById('result-defeated').innerText = defeatedMonsters.join(" ");
+    } else if (currentModeObj.id === 'infinite') {
+      document.getElementById('result-title').innerText = `⚡ ${earnedKills}体 討伐！`;
+      document.getElementById('result-title').style.color = "#27ae60";
+      document.getElementById('result-defeated').style.display = "none";
+    } else {
+      document.getElementById('result-title').innerText = isClear ? "🏆 完全討伐クリア！！" : "💀 討伐失敗...";
+      document.getElementById('result-title').style.color = isClear ? "#f1c40f" : "#ff4757";
+      document.getElementById('result-defeated').style.display = "none";
+    }
+
+    document.getElementById('result-score').innerText = `スコア: ${totalScore} pt`;
+
+    // 無限回路編のベストスコア更新判定
+    const bestEl = document.getElementById('result-best');
+    if (currentModeObj.id === 'infinite') {
+      if (totalScore > currentBestScore) {
+        localStorage.setItem('quizBestScore_infinite', String(totalScore));
+        bestEl.innerHTML = `<span style="color:#f1c40f;">🎉 自己ベスト更新！ (${totalScore} pt)</span>`;
+      } else {
+        bestEl.innerText = `自己ベスト: ${currentBestScore} pt`;
+      }
+      bestEl.style.display = "block";
+    } else {
+      bestEl.style.display = "none";
+    }
+
+    document.getElementById('result-exp').innerText = `獲得EXP: ${earnedExp}`;
+    localStorage.setItem('quizChar', JSON.stringify(player));
+  }
+
+  function showReview() {
+    hideAllScreens(); document.getElementById('review-screen').style.display = "block";
+    const list = document.getElementById('review-list'); list.innerHTML = "";
+    runHistory.forEach((h, i) => { 
+      list.innerHTML += `<div class="review-item ${h.ok ? 'review-ok' : 'review-ng'}">
+        <div style="font-weight:bold; margin-bottom:4px;">Q${i+1}. ${h.q}</div>
+        <div style="color:#f39c12; margin-bottom:2px;">選択: ${h.selected || 'なし'}</div>
+        <div style="color:#2ed573;">正解: ${h.correct}</div>
+      </div>`; 
+    });
+  }
+  
+  function returnToMenu() { showModes(); }
+  function retireGame() { gameEnd(false); }
+
+  // タブ区切りテキスト or Excel/CSVの行データ(配列の配列)から問題データを構築する共通処理
+  function buildQuizDataFromRows(rows) {
+    let newData = { "通常": [], "地獄級": [] };
+    rows.forEach(cols => {
+      if (!cols || cols.length < 4) return;
+      const c0 = (cols[0] ?? "").toString().trim();
+      const c1 = (cols[1] ?? "").toString().trim();
+      const c2 = (cols[2] ?? "").toString().trim();
+      if (!c1 || !c2) return;
+      const isHell = c0 === "地獄級";
+      const category = isHell ? "地獄級" : "通常";
+      const ansIndices = c2.split(',').map(n => parseInt(n.trim()) - 1).filter(n => !isNaN(n));
+      const opts = cols.slice(3).map(c => (c ?? "").toString().trim()).filter(c => c !== "");
+      if (ansIndices.length === 0 || opts.length === 0) return; // ヘッダー行など不正な行はスキップ
+      newData[category].push({ q: c1, ans: ansIndices, opts: opts });
+    });
+    return newData;
+  }
+
+  function initExcelDropzone() {
+    const dz = document.getElementById('excel-dropzone');
+    const fileInput = document.getElementById('excel-file-input');
+    if (!dz || !fileInput) return;
+
+    dz.addEventListener('click', () => fileInput.click());
+    dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+    dz.addEventListener('drop', (e) => {
+      e.preventDefault(); dz.classList.remove('drag-over');
+      const file = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) handleExcelFile(file);
+    });
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) handleExcelFile(file);
+    });
+  }
+
+  function handleExcelFile(file) {
+    const preview = document.getElementById('excel-preview');
+    const ext = file.name.split('.').pop().toLowerCase();
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        let workbook;
+        if (ext === 'csv') workbook = XLSX.read(e.target.result, { type: 'string' });
+        else workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+
+        importedRows = rows;
+        const newData = buildQuizDataFromRows(rows);
+        const total = newData["通常"].length + newData["地獄級"].length;
+
+        preview.style.display = "block";
+        if (total === 0) {
+          preview.innerHTML = `<span style="color:#ff4757;">⚠️ 問題を読み取れませんでした．列の形式(分類/問題/正解番号/選択肢…)を確認してください．</span>`;
+          importedRows = null;
+        } else {
+          preview.innerHTML = `✅ <strong>${file.name}</strong> を読み込みました<br>通常: ${newData["通常"].length}問 / 地獄級: ${newData["地獄級"].length}問（合計 ${total}問）<br><span style="color:#aaa; font-size:11px;">このまま下の「ゲームを出力して保存」を押してください</span>`;
+        }
+      } catch (err) {
+        preview.style.display = "block";
+        preview.innerHTML = `<span style="color:#ff4757;">⚠️ ファイルの読み込みに失敗しました．(${err.message})</span>`;
+        importedRows = null;
+      }
+    };
+
+    if (ext === 'csv') reader.readAsText(file, 'UTF-8');
+    else reader.readAsArrayBuffer(file);
+  }
+
+  function downloadTemplate() {
+    const rows = [
+      ["分類(空欄可)", "問題", "正解番号(カンマ区切り可)", "選択肢1", "選択肢2", "選択肢3", "選択肢4"],
+      ["", "日本の首都はどこ？", "1", "東京", "大阪", "京都", "名古屋"],
+      ["", "複数正解の例（1と3が正解）", "1,3", "選択肢A", "選択肢B", "選択肢C", "選択肢D"]
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "問題");
+    XLSX.writeFile(wb, "quiz_template.xlsx");
+  }
+
+  function exportGame() {
+    let newData;
+    if (importedRows) {
+      newData = buildQuizDataFromRows(importedRows);
+    } else {
+      const text = document.getElementById('import-text').value;
+      if (!text.trim()) return alert("問題データを入力するか，Excel/CSVファイルをドラッグ&ドロップしてください．");
+      const rows = text.split("\n").map(line => line.split("\t"));
+      newData = buildQuizDataFromRows(rows);
+    }
+    if (newData["通常"].length === 0 && newData["地獄級"].length === 0) return alert("データがありません．");
+
+    // 書き出し前に、現在の作成画面の見た目(プレビュー表示や入力途中のテキストなど)が
+    // そのまま静的HTMLに焼き付いてしまわないよう、一時的にリセットしてからスナップショットを取る。
+    // (焼き付いたままだと、受け取った相手が開いた瞬間に「作成画面」を見てしまう不具合の原因になるため)
+    const makerScreenEl = document.getElementById('maker-screen');
+    const excelPreviewEl = document.getElementById('excel-preview');
+    const importTextEl = document.getElementById('import-text');
+    const dropzoneEl = document.getElementById('excel-dropzone');
+
+    const savedMakerDisplay = makerScreenEl.style.display;
+    const savedExcelPreviewHTML = excelPreviewEl.innerHTML;
+    const savedExcelPreviewDisplay = excelPreviewEl.style.display;
+    const savedImportText = importTextEl.value;
+    const savedDropzoneClass = dropzoneEl.className;
+
+    makerScreenEl.style.display = "none";
+    excelPreviewEl.innerHTML = "";
+    excelPreviewEl.style.display = "none";
+    importTextEl.value = "";
+    dropzoneEl.className = "dropzone";
+
+    let htmlContent = document.documentElement.outerHTML;
+
+    // 作成者自身の作業画面はそのまま続けられるよう、状態を元に戻す
+    makerScreenEl.style.display = savedMakerDisplay;
+    excelPreviewEl.innerHTML = savedExcelPreviewHTML;
+    excelPreviewEl.style.display = savedExcelPreviewDisplay;
+    importTextEl.value = savedImportText;
+    dropzoneEl.className = savedDropzoneClass;
+
+    const dataScript = `<script id="quiz-data-script">\n    window.QUIZ_DATA = ${JSON.stringify(newData)};\n  <\/script>`;
+    htmlContent = htmlContent.replace(/<script id="quiz-data-script">[\s\S]*?<\/script>/, dataScript);
+
+    try {
+      const blob = new Blob(["<!DOCTYPE html>\n<html lang='ja'>\n" + htmlContent + "\n</html>"], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+
+      // iOS Safari(及びiOS上の他ブラウザ)はdownload属性でのBlob保存に対応していないため、新規タブで開いて手動保存を案内する
+      const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      if (isIOS) {
+        const newTab = window.open(url, '_blank');
+        if (!newTab) {
+          alert("ポップアップがブロックされました．ブラウザの設定でこのサイトのポップアップを許可してから，もう一度お試しください．");
+        } else {
+          alert("新しいタブでファイルが開きます．共有ボタン（□に↑）から「”ブック”に保存」または「ファイルに保存」を選んでダウンロードしてください．");
+        }
+      } else {
+        // Android/PC: <a download>方式。DOMに追加してからclickしないと反応しないブラウザがあるため追加する
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "my_quiz_rpg.html";
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (err) {
+      // ここに来る場合、LINEやInstagram等のアプリ内ブラウザでダウンロードが制限されている可能性が高い
+      alert("保存に失敗しました．アプリ内ブラウザ（LINE/Instagram等）で開いている場合は，Safari/Chromeなど標準ブラウザで開き直してからお試しください．\n\nエラー内容: " + err.message);
+    }
+  }
+</script>
+
+</body></html>
+</html>
