@@ -1885,7 +1885,7 @@
     mSprite.style.transition = 'opacity 0.35s ease-out, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
     mSprite.style.opacity = '1';
     mSprite.style.transform = 'scale(1) translateX(0)';
-    setTimeout(() => { mSprite.style.transition = 'none'; }, 420);
+    scheduleGameTimeout(() => { mSprite.style.transition = 'none'; }, 420);
   }
 
   // ボス登場時に一瞬「BOSS」の文字を表示する
@@ -2010,6 +2010,19 @@
   let player = { name: "", icon: "⚔️", race: "human", raceIcon: "🧑", raceName: "人間", lv: 1, exp: 0, totalKills: 0, coins: 0, skills: { eliminate: 0, dropN: 0, dropR: 0, dropSR: 0, logCap: 0 }, drops: {}, equippedItem: null, history: [], qStats: {}, totalAnswered: 0, totalCorrect: 0, bestCombo: 0, gamesPlayed: 0, hasLegendaryItem: false, settings: { bgmVolume: 0.5, sfxVolume: 1.0, bgmMuted: false } };
   let currentModeObj = null; let currentLives = 3; let qCount = 0; let killedCount = 0; let earnedExp = 0; let earnedKills = 0;
   let normalPool = [], hellPool = []; let enemyQueue = []; let runHistory = []; let currentQData = null; let selectedAnswers = new Set();
+
+  // ゲーム進行用の遅延処理は、このセッションIDが一致している間だけ実行する。
+  // リタイア/ゲーム終了後に前のrunのsetTimeoutが発火して、次のrunを勝手に進める事故を防ぐ。
+  let gameSessionId = 0;
+  function beginGameSession() { gameSessionId++; return gameSessionId; }
+  function invalidateGameSession() { gameSessionId++; }
+  function scheduleGameTimeout(fn, delayMs) {
+    const sessionId = gameSessionId;
+    return setTimeout(() => {
+      if (sessionId !== gameSessionId) return;
+      fn();
+    }, delayMs);
+  }
   let combo = 0; let maxCombo = 0; let totalScore = 0;
   let isEliminateUsed = false; let isItemEliminateUsed = false; let defeatedMonsters = [];
   let poisonTurns = 0;
@@ -3032,7 +3045,7 @@
     updateLifeUI(); document.getElementById('live-score').innerText=totalScore; nightPendingTest=null; renderNightPanel();
     if(currentLives<=0){ gameEnd(false,'nightshift'); return; }
     if(nightMinute>=470){ showNightDiagnosis(); return; }
-    setTimeout(() => maybeNightInterrupt(showNightCaseMenu),220);
+    scheduleGameTimeout(() => maybeNightInterrupt(showNightCaseMenu),220);
   }
 
 
@@ -3051,7 +3064,7 @@
     if (action === ev.correct) { totalScore += 120; earnedExp += 5; nightLog(`${ev.title}: 適切に処理。`); playSound('hit'); }
     else { currentLives--; totalScore=Math.max(0,totalScore-100); nightWrongCategories['医療安全']=(nightWrongCategories['医療安全']||0)+1; nightLog(`${ev.title}: 判断ミス。PATIENT SAFETY -1`); playSound('damage'); }
     updateLifeUI();document.getElementById('live-score').innerText=totalScore;renderNightPanel();
-    if(currentLives<=0){gameEnd(false,'nightshift');return;} setTimeout(nextFn,250);
+    if(currentLives<=0){gameEnd(false,'nightshift');return;} scheduleGameTimeout(nextFn,250);
   }
 
   function showNightDiagnosis() {
@@ -3070,7 +3083,7 @@
     nightCaseIndex++;
     if(currentLives<=0){gameEnd(false,'nightshift');return;}
     if(nightCaseIndex>=nightCases.length || nightMinute>=440){ startNightBoss(); return; }
-    nightCase=nightCases[nightCaseIndex]; nightUsedTests=new Set(); nightClues=[]; nightPendingTest=null; nightPhase='case'; addNightTime(15); renderNightPanel(); setTimeout(() => maybeNightInterrupt(showNightCaseMenu),500);
+    nightCase=nightCases[nightCaseIndex]; nightUsedTests=new Set(); nightClues=[]; nightPendingTest=null; nightPhase='case'; addNightTime(15); renderNightPanel(); scheduleGameTimeout(() => maybeNightInterrupt(showNightCaseMenu),500);
   }
 
   function historicalNightWeakness() {
@@ -3108,11 +3121,11 @@
     if(ok){nightBossHits++;totalScore+=300;earnedExp+=20;earnedKills+=2;msg.style.color='#a3e635';msg.innerHTML=`⚔️ WEAKNESS BREAK! ${nightBossHits}/${nightBossAsked}`;playSound('hit');playAttackFx();}
     else{currentLives--;nightWrongCategories[nightBossCategory]=(nightWrongCategories[nightBossCategory]||0)+1;msg.style.color='#fb7185';msg.innerHTML='💥 誤謬集合体の反撃。PATIENT SAFETY -1';playSound('damage');document.querySelectorAll('.opt-btn').forEach(b=>{if(currentQData.ans.includes(parseInt(b.dataset.idx)))b.classList.add('opt-correct-hint');b.disabled=true;});}
     updateLifeUI();document.getElementById('live-score').innerText=totalScore;renderNightPanel();safeStorage.set('quizChar',JSON.stringify(player));
-    setTimeout(()=>{if(currentLives<=0){gameEnd(false,'nightboss');return;}if(nightBossAsked>=NIGHT_BOSS_TOTAL)finishNightBoss();else nextNightBossQuiz();},1300);
+    scheduleGameTimeout(()=>{if(currentLives<=0){gameEnd(false,'nightboss');return;}if(nightBossAsked>=NIGHT_BOSS_TOTAL)finishNightBoss();else nextNightBossQuiz();},1300);
   }
 
   function finishNightBoss() {
-    const clear=nightBossHits>=2; nightMinute=480; renderNightPanel(); setTimeout(()=>gameEnd(clear,clear?'nightclear':'nightboss'),300);
+    const clear=nightBossHits>=2; nightMinute=480; renderNightPanel(); scheduleGameTimeout(()=>gameEnd(clear,clear?'nightclear':'nightboss'),300);
   }
 
 
@@ -3476,6 +3489,9 @@
     }
 
     if (currentPool.length === 0) return alert("問題がありません．");
+
+    // 新しいrunを開始。これ以前のrunが予約した遅延callbackは以後すべて無効になる。
+    beginGameSession();
     
     currentModeObj = mode; currentLives = mode.lives;
     player.gamesPlayed = (player.gamesPlayed || 0) + 1;
@@ -3752,7 +3768,7 @@
     hellMainDeadlineAt = Date.now() + hellMainRemainingMs;
     const ratio = hellMainRemainingMs / (HELL_MAIN_LIMIT_SEC * 1000);
     startHellGauge(hellMainRemainingMs / 1000, ratio);
-    hellMainTimeout = setTimeout(() => {
+    hellMainTimeout = scheduleGameTimeout(() => {
       hellMainTimeout = null;
       onHellMainTimeout();
     }, hellMainRemainingMs);
@@ -3781,7 +3797,7 @@
       hellMainRemainingMs = HELL_MAIN_LIMIT_SEC * 1000;
       hellMainDeadlineAt = Date.now() + hellMainRemainingMs;
       startHellGauge(HELL_MAIN_LIMIT_SEC, 1);
-      hellMainTimeout = setTimeout(() => { hellMainTimeout = null; onHellMainTimeout(); }, hellMainRemainingMs);
+      hellMainTimeout = scheduleGameTimeout(() => { hellMainTimeout = null; onHellMainTimeout(); }, hellMainRemainingMs);
     } else {
       hellMainRemainingMs = 0;
       hellMainDeadlineAt = 0;
@@ -3789,7 +3805,7 @@
     }
 
     if (hellQuestionMode === 'both' || hellQuestionMode === 'interrupt') {
-      hellInterruptTimeout = setTimeout(triggerHellInterrupt, HELL_INTERRUPT_INTERVAL_MS);
+      hellInterruptTimeout = scheduleGameTimeout(triggerHellInterrupt, HELL_INTERRUPT_INTERVAL_MS);
     }
   }
 
@@ -3810,7 +3826,7 @@
     const container = document.getElementById('main-container');
     container.classList.remove('shake-hard'); void container.offsetWidth; container.classList.add('shake-hard');
     resetAnimation('current-monster', 'monsterAttack', '0.3s');
-    setTimeout(() => resetAnimation('player-sprite', 'playerDamage', '0.3s'), 150);
+    scheduleGameTimeout(() => resetAnimation('player-sprite', 'playerDamage', '0.3s'), 150);
     combo = 0; updateComboUI();
     msg.innerHTML = `⏰ 制限時間切れ！<br>❌ 被弾！`;
     msg.style.color = "#ff4757";
@@ -3823,9 +3839,9 @@
     safeStorage.set('quizChar', JSON.stringify(player));
     if (currentLives <= 0) {
       msg.innerHTML += "<br>💀 ライフが尽きた... 討伐失敗";
-      setTimeout(() => gameEnd(false, 'defeat'), 1500);
+      scheduleGameTimeout(() => gameEnd(false, 'defeat'), 1500);
     } else {
-      setTimeout(() => nextQuiz(true), 1500);
+      scheduleGameTimeout(() => nextQuiz(true), 1500);
     }
   }
 
@@ -3852,7 +3868,7 @@
     if (hellInterruptActive) return;
 
     const interruptQ = pickInterruptQuestion();
-    if (!interruptQ) { hellInterruptTimeout = setTimeout(triggerHellInterrupt, HELL_INTERRUPT_INTERVAL_MS); return; }
+    if (!interruptQ) { hellInterruptTimeout = scheduleGameTimeout(triggerHellInterrupt, HELL_INTERRUPT_INTERVAL_MS); return; }
 
     hellInterruptStartedAt = Date.now();
     pauseHellMainTimerForInterrupt();
@@ -3888,7 +3904,7 @@
       gaugeFill.style.transition = `width ${HELL_INTERRUPT_ANSWER_LIMIT_SEC}s linear`;
       gaugeFill.style.width = "0%";
     }
-    hellInterruptAnswerTimeout = setTimeout(() => {
+    hellInterruptAnswerTimeout = scheduleGameTimeout(() => {
       hellInterruptAnswerTimeout = null;
       resolveHellInterrupt(false, true);
     }, HELL_INTERRUPT_ANSWER_LIMIT_SEC * 1000);
@@ -3925,7 +3941,7 @@
       if (currentLives <= 0) {
         clearHellTimers();
         if (msg) msg.innerHTML += "<br>💀 ライフが尽きた... 討伐失敗";
-        setTimeout(() => gameEnd(false, 'defeat'), 1200);
+        scheduleGameTimeout(() => gameEnd(false, 'defeat'), 1200);
         return;
       }
     }
@@ -3935,7 +3951,7 @@
 
     // 主問題がまだ未解答なら、この問題に割り込みクイズが割り当てられている場合に限り、解決してから一定時間後に次の割り込みを再スケジュールする
     if (hellQuestionActive && (hellQuestionMode === 'both' || hellQuestionMode === 'interrupt')) {
-      hellInterruptTimeout = setTimeout(triggerHellInterrupt, HELL_INTERRUPT_INTERVAL_MS);
+      hellInterruptTimeout = scheduleGameTimeout(triggerHellInterrupt, HELL_INTERRUPT_INTERVAL_MS);
     }
   }
 
@@ -4007,7 +4023,7 @@
     msg.innerHTML += `<br><span class="drop-text" style="color:#fff; text-shadow:0 0 10px #f1c40f, 0 0 20px #f1c40f;">👑✨ 【${LEGENDARY_ITEM.name}】を手に入れた……！✨👑</span>`;
     playSound('clear');
     playItemDropFx('👑');
-    setTimeout(() => alert(`✨✨✨ 伝説のアイテムを入手しました ✨✨✨\n\n【${LEGENDARY_ITEM.name}】\n\n${LEGENDARY_ITEM.desc}`), 600);
+    scheduleGameTimeout(() => alert(`✨✨✨ 伝説のアイテムを入手しました ✨✨✨\n\n【${LEGENDARY_ITEM.name}】\n\n${LEGENDARY_ITEM.desc}`), 600);
   }
 
   function checkLegendaryDrop(msg) {
@@ -4050,7 +4066,7 @@
       playSound('hit'); hitStop(); playAttackFx();
       
       resetAnimation('player-sprite', 'playerAttack', '0.3s');
-      setTimeout(() => resetAnimation('current-monster', 'monsterDamage', '0.3s'), 150);
+      scheduleGameTimeout(() => resetAnimation('current-monster', 'monsterDamage', '0.3s'), 150);
       
       combo++; if(combo > maxCombo) maxCombo = combo;
       if (combo > (player.bestCombo || 0)) player.bestCombo = combo;
@@ -4132,18 +4148,18 @@
       updateComboUI();
       
       if (monsterDefeatedNow) {
-        setTimeout(() => { 
+        scheduleGameTimeout(() => { 
           resetAnimation('current-monster', 'monsterDefeat', '0.3s', 'forwards');
-          setTimeout(() => {
+          scheduleGameTimeout(() => {
             if (killedCount >= currentModeObj.count) { gameEnd(true); return; }
             resetAnimation('player-sprite', 'playerAdvance', '0.35s');
             playSound('walk');
-            setTimeout(() => { nextQuiz(); }, 700);
+            scheduleGameTimeout(() => { nextQuiz(); }, 700);
           }, 300);
         }, 1000);
       } else {
         // ボスがまだ生きている: 撃破アニメーションは出さず、同じボスに次の問題を出題する
-        setTimeout(() => { nextQuiz(true); }, 700);
+        scheduleGameTimeout(() => { nextQuiz(true); }, 700);
       }
 
     } else {
@@ -4159,7 +4175,7 @@
         msg.innerHTML += `<span style='color:#3498db; font-size:12px;'>${negateMsg}</span><br>`;
         playItemEffectFx(negateIcon, '攻撃無効！', negateColor);
         combo = 0; updateComboUI(); runHistory.push({ q: currentQData.q, selected: selectedTexts, correct: correctTexts, ok: false });
-        setTimeout(() => nextQuiz(true), 1500); return;
+        scheduleGameTimeout(() => nextQuiz(true), 1500); return;
       }
 
       playSound('damage');
@@ -4167,7 +4183,7 @@
       container.classList.remove('shake-hard'); void container.offsetWidth; container.classList.add('shake-hard');
       
       resetAnimation('current-monster', 'monsterAttack', '0.3s');
-      setTimeout(() => resetAnimation('player-sprite', 'playerDamage', '0.3s'), 150);
+      scheduleGameTimeout(() => resetAnimation('player-sprite', 'playerDamage', '0.3s'), 150);
       
       combo = 0; updateComboUI(); msg.innerHTML += `❌ 被弾！<br>`; msg.style.color = "#ff4757";
       currentLives--; runHistory.push({ q: currentQData.q, selected: selectedTexts, correct: correctTexts, ok: false });
@@ -4181,7 +4197,7 @@
       if (POISON_MODES.includes(currentModeObj.id) && !HIDE_ANSWER_COUNT_MODES.includes(currentModeObj.id) && Math.random() < 0.30) {
         poisonTurns = 2;
         msg.innerHTML += "<span class='poison-alert'>🐍☠️ 猛毒を受けた！しばらく選択肢の数が分からなくなる...</span>";
-        setTimeout(() => { playSound('poison'); playPoisonFx(); }, 350);
+        scheduleGameTimeout(() => { playSound('poison'); playPoisonFx(); }, 350);
       }
 
       if (currentLives <= 0 && effectiveItem() === 'kimwipe' && Math.random() < 0.10) {
@@ -4193,8 +4209,8 @@
       updateLifeUI();
       
       if (currentLives <= 0) {
-        msg.innerHTML += "💀 ライフが尽きた... 討伐失敗"; setTimeout(() => gameEnd(false, 'defeat'), 1500);
-      } else { setTimeout(() => nextQuiz(true), 1500); }
+        msg.innerHTML += "💀 ライフが尽きた... 討伐失敗"; scheduleGameTimeout(() => gameEnd(false, 'defeat'), 1500);
+      } else { scheduleGameTimeout(() => nextQuiz(true), 1500); }
     }
     safeStorage.set('quizChar', JSON.stringify(player));
   }
@@ -4204,10 +4220,12 @@
     if (combo < 2) { el.innerText = ""; el.className = "combo-counter"; return; }
     el.innerText = `${combo} CHAIN!`; el.className = "combo-counter pop";
     if (combo >= 5) el.classList.add("combo-fire");
-    setTimeout(() => el.classList.remove("pop"), 150);
+    scheduleGameTimeout(() => el.classList.remove("pop"), 150);
   }
 
   function gameEnd(isClear, reason = null) {
+    // このrunに属する未実行の進行callbackを最初に全無効化する。
+    invalidateGameSession();
     clearHellTimers(); // 地獄級のタイマー/割り込みオーバーレイが残らないよう必ず片付ける
     hideBossHpBar();
     teardownNightShiftUI();
