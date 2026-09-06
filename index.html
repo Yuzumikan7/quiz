@@ -2976,8 +2976,9 @@
   }
 
   // 通常戦闘・夜勤検査・夜勤ボスで共通の「学習統計」と「全体履歴」更新処理。
-  function recordQuestionResult(isCorrect) {
-    const { selectedTexts, correctTexts } = getCurrentAnswerTexts();
+  function recordQuestionResult(isCorrect, selectedOverride = null) {
+    const { selectedTexts: rawSelectedTexts, correctTexts } = getCurrentAnswerTexts();
+    const selectedTexts = selectedOverride !== null ? selectedOverride : rawSelectedTexts;
     player.qStats = player.qStats || {};
     const stat = player.qStats[currentQData.id] || { a: 0, c: 0 };
     stat.a++;
@@ -3815,7 +3816,10 @@
     msg.style.color = "#ff4757";
     currentLives--;
     updateLifeUI();
-    runHistory.push({ q: currentQData.q, selected: "(時間切れ)", correct: currentQData.ans.map(i => currentQData.opts[i]).join(", "), ok: false });
+    // 時間切れも通常の誤答と同様に、問題別統計・総回答数・全体履歴へ記録する。
+    // 途中で選択肢を触っていても、履歴上は明確に「時間切れ」として残す。
+    const { correctTexts } = recordQuestionResult(false, "(時間切れ)");
+    runHistory.push({ q: currentQData.q, selected: "(時間切れ)", correct: correctTexts, ok: false });
     safeStorage.set('quizChar', JSON.stringify(player));
     if (currentLives <= 0) {
       msg.innerHTML += "<br>💀 ライフが尽きた... 討伐失敗";
@@ -3863,10 +3867,10 @@
         <div class="hell-emergency-banner">🚨 EMERGENCY 🚨</div>
         <div class="hell-interrupt-sub">${HELL_INTERRUPT_ANSWER_LIMIT_SEC}秒以内に正解しないとライフ-1</div>
         <div class="hell-interrupt-gauge-bg"><div class="hell-interrupt-gauge-fill" id="hell-interrupt-gauge-fill"></div></div>
-        <div class="hell-interrupt-question">${interruptQ.q}</div>
+        <div class="hell-interrupt-question">${escapeHtml(interruptQ.q)}</div>
         <div class="hell-interrupt-options">
-          <button class="btn" data-no-click-sound="true" data-correct="${interruptQ.options[0].correct}">${interruptQ.options[0].text}</button>
-          <button class="btn" data-no-click-sound="true" data-correct="${interruptQ.options[1].correct}">${interruptQ.options[1].text}</button>
+          <button class="btn" data-no-click-sound="true" data-correct="${interruptQ.options[0].correct}">${escapeHtml(interruptQ.options[0].text)}</button>
+          <button class="btn" data-no-click-sound="true" data-correct="${interruptQ.options[1].correct}">${escapeHtml(interruptQ.options[1].text)}</button>
         </div>
       </div>
     `;
